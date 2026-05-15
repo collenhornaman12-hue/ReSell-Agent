@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { OverallProgress, ItemProgress } from './UploadProgress'
 import { useCloudinaryUpload } from '@/hooks/useCloudinaryUpload'
+import { useBatchPolling } from '@/hooks/useBatchPolling'
 import { Camera, Plus } from 'lucide-react'
 
 const ACCEPTED = ['image/jpeg', 'image/png', 'image/webp']
@@ -23,6 +24,8 @@ export function MobileUpload() {
   const pendingCaptureSessionRef = useRef<string | null>(null)
   const allPreviewUrlsRef = useRef<Set<string>>(new Set())
   const { batch, uploadBatch, overallPercent, reset } = useCloudinaryUpload()
+  const batchId = batch?.triggerStatus === 'success' ? batch.batchId : null
+  const { items: visionItems, isDone: visionDone } = useBatchPolling(batchId)
 
   const activeSession = sessions.find((s) => s.id === activeSessionId) ?? null
 
@@ -97,6 +100,24 @@ export function MobileUpload() {
             <ItemProgress key={item.itemName} item={item} />
           ))}
         </div>
+        {visionItems.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-muted-foreground">
+              Vision results ({visionDone ? 'complete' : 'processing…'})
+            </p>
+            {visionItems.map((vi) => (
+              <div
+                key={vi.item_id}
+                className="flex items-center justify-between rounded border p-2 text-sm"
+              >
+                <span className="font-medium truncate max-w-[60%]">{vi.item_name}</span>
+                <span className="text-xs text-muted-foreground">
+                  {vi.identification_confidence ?? '—'}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
         {isDone && (
           <Button variant="outline" onClick={handleReset} className="w-full">
             Start New Session
