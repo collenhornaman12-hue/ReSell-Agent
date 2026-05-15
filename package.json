@@ -1,0 +1,11 @@
+{
+  "name": "resell-agent",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "setup-db": "node scripts/setup-db.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.105.4"
+  }
+}
