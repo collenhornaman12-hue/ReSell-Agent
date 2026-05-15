@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -15,32 +15,33 @@ interface Session {
   previews: string[]
 }
 
-let sessionCounter = 1
-
 export function MobileUpload() {
   const [sessions, setSessions] = useState<Session[]>([])
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
+  const sessionCounterRef = useRef(1)
+  const pendingCaptureSessionRef = useRef<string | null>(null)
   const { batch, uploadBatch, overallPercent, reset } = useCloudinaryUpload()
 
   const activeSession = sessions.find((s) => s.id === activeSessionId) ?? null
 
   const handleNewItem = useCallback(() => {
     const id = crypto.randomUUID()
-    const name = `Item ${sessionCounter++}`
+    const name = `Item ${sessionCounterRef.current++}`
     setSessions((prev) => [...prev, { id, name, files: [], previews: [] }])
     setActiveSessionId(id)
   }, [])
 
   const handleCameraCapture = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (!activeSessionId) return
+      const targetId = pendingCaptureSessionRef.current
+      if (!targetId) return
       const files = Array.from(e.target.files ?? []).filter((f) => ACCEPTED.includes(f.type))
       if (files.length === 0) return
 
       setSessions((prev) =>
         prev.map((s) => {
-          if (s.id !== activeSessionId) return s
+          if (s.id !== targetId) return s
           const previews = files.map((f) => URL.createObjectURL(f))
           return { ...s, files: [...s.files, ...files], previews: [...s.previews, ...previews] }
         })
@@ -48,7 +49,7 @@ export function MobileUpload() {
 
       if (cameraInputRef.current) cameraInputRef.current.value = ''
     },
-    [activeSessionId]
+    []
   )
 
   const handleUploadAll = useCallback(async () => {
@@ -62,8 +63,14 @@ export function MobileUpload() {
     reset()
     setSessions([])
     setActiveSessionId(null)
-    sessionCounter = 1
+    sessionCounterRef.current = 1
   }, [sessions, reset])
+
+  useEffect(() => {
+    const urls = sessions.flatMap((s) => s.previews)
+    return () => urls.forEach((url) => URL.revokeObjectURL(url))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const isUploading = batch?.overallStatus === 'uploading'
   const isDone = batch?.overallStatus === 'done'
@@ -121,9 +128,9 @@ export function MobileUpload() {
             {/* Thumbnail strip */}
             {activeSession.previews.length > 0 && (
               <div className="flex gap-1 overflow-x-auto pb-1 mb-3">
-                {activeSession.previews.slice(-8).map((url, i) => (
+                {activeSession.previews.slice(-8).map((url) => (
                   <img
-                    key={i}
+                    key={url}
                     src={url}
                     alt=""
                     className="w-14 h-14 object-cover rounded flex-shrink-0"
@@ -135,7 +142,10 @@ export function MobileUpload() {
             <Button
               variant="outline"
               className="w-full gap-2"
-              onClick={() => cameraInputRef.current?.click()}
+              onClick={() => {
+                pendingCaptureSessionRef.current = activeSessionId
+                cameraInputRef.current?.click()
+              }}
             >
               <Camera className="h-4 w-4" />
               Add Photos
