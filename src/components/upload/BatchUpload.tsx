@@ -32,6 +32,11 @@ async function readEntries(entry: FileSystemDirectoryEntry): Promise<File[]> {
               })
             })
           }
+          if (e.isDirectory) {
+            return readEntries(e as FileSystemDirectoryEntry).then((subFiles) => {
+              files.push(...subFiles)
+            })
+          }
           return Promise.resolve()
         })
         Promise.all(promises).then(readBatch)
@@ -52,7 +57,7 @@ async function extractFolderItems(dataTransfer: DataTransfer): Promise<FolderIte
       if (entry.isDirectory) {
         const files = await readEntries(entry as FileSystemDirectoryEntry)
         if (files.length > 0) {
-          folderMap[entry.name] = files
+          folderMap[entry.name] = [...(folderMap[entry.name] ?? []), ...files]
         }
       } else if (entry.isFile) {
         const file = item.getAsFile()
@@ -67,27 +72,29 @@ async function extractFolderItems(dataTransfer: DataTransfer): Promise<FolderIte
   return Object.entries(folderMap).map(([name, files]) => ({ name, files }))
 }
 
+function validateItems(items: FolderItem[]): string | null {
+  const total = items.reduce((s, i) => s + i.files.length, 0)
+  if (total === 0) return 'No valid image files found.'
+  if (total > MAX_FILES) return `Too many files (${total}). Max is ${MAX_FILES}.`
+  return null
+}
+
 export function BatchUpload() {
   const [isDragOver, setIsDragOver] = useState(false)
   const [pendingItems, setPendingItems] = useState<FolderItem[]>([])
   const [validationError, setValidationError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const dragCounterRef = useRef(0)
   const { batch, uploadBatch, overallPercent, reset } = useCloudinaryUpload()
-
-  const validateItems = (items: FolderItem[]): string | null => {
-    const total = items.reduce((s, i) => s + i.files.length, 0)
-    if (total === 0) return 'No valid image files found.'
-    if (total > MAX_FILES) return `Too many files (${total}). Max is ${MAX_FILES}.`
-    return null
-  }
 
   const handleDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault()
+    dragCounterRef.current = 0
     setIsDragOver(false)
     setValidationError(null)
     const items = await extractFolderItems(e.dataTransfer)
     const err = validateItems(items)
-    if (err) { setValidationError(err); return }
+    if (err) { setValidationError(err); setPendingItems([]); return }
     setPendingItems(items)
   }, [])
 
@@ -120,8 +127,9 @@ export function BatchUpload() {
       {!batch && (
         <>
           <div
-            onDragOver={(e) => { e.preventDefault(); setIsDragOver(true) }}
-            onDragLeave={() => setIsDragOver(false)}
+            onDragEnter={(e) => { e.preventDefault(); dragCounterRef.current++; setIsDragOver(true) }}
+            onDragOver={(e) => { e.preventDefault() }}
+            onDragLeave={() => { dragCounterRef.current--; if (dragCounterRef.current === 0) setIsDragOver(false) }}
             onDrop={handleDrop}
             className={`border-2 border-dashed rounded-lg p-10 text-center cursor-pointer transition-colors ${
               isDragOver
@@ -131,7 +139,7 @@ export function BatchUpload() {
             onClick={() => fileInputRef.current?.click()}
             role="button"
             tabIndex={0}
-            onKeyDown={(e) => e.key === 'Enter' && fileInputRef.current?.click()}
+            onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && fileInputRef.current?.click()}
           >
             <UploadCloud className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
             <p className="text-base font-medium">Drop folders or images here</p>
