@@ -1,6 +1,6 @@
 import { extractItem } from './vision'
 import { insertItem, fetchItemsByBatch } from './supabase'
-import type { Env, TriggerItem, TriggerPayload, ItemInsert } from './types'
+import type { Env, TriggerItem, TriggerPayload, ItemInsert, VisionExtracted } from './types'
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -24,7 +24,7 @@ async function processItems(
   for (let offset = 0; offset < items.length; offset += CHUNK_SIZE) {
     const chunk = items.slice(offset, offset + CHUNK_SIZE)
     for (const item of chunk) {
-      let extracted
+      let extracted: VisionExtracted
       try {
         extracted = await extractItem(item, env)
       } catch {
@@ -36,7 +36,7 @@ async function processItems(
           subcategory: null,
           condition_raw: 'Good',
           condition_ebay: 'Good',
-          condition_notes: 'Vision processing failed',
+          condition_notes: 'Vision unable to identify',
           is_complete: true,
           keywords: [] as string[],
           identification_confidence: 'Low',
@@ -88,7 +88,7 @@ export default {
         return json({ error: 'Invalid JSON body' }, 400)
       }
 
-      if (!payload.batch_id || !Array.isArray(payload.items)) {
+      if (typeof payload.batch_id !== 'string' || !payload.batch_id || !Array.isArray(payload.items)) {
         return json({ error: 'Missing batch_id or items' }, 400)
       }
 

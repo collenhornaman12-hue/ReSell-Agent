@@ -25,7 +25,7 @@ export interface VisionExtracted {
   condition_notes: string | null
   is_complete: boolean
   keywords: string[]
-  identification_confidence: string
+  identification_confidence: 'High' | 'Medium' | 'Low'
 }
 
 export interface ItemInsert {
@@ -40,7 +40,7 @@ export interface ItemInsert {
   condition_notes: string | null
   is_complete: boolean
   keywords: string[]
-  identification_confidence: string
+  identification_confidence: 'High' | 'Medium' | 'Low'
   status: 'PendingReview'
   created_by: 'system'
   ebay_price: null
