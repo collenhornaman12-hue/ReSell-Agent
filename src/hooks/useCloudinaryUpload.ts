@@ -36,8 +36,7 @@ function makeThumbnailUrl(secureUrl: string): string {
 
 async function uploadFile(
   file: File,
-  publicId: string,
-  onProgress: (pct: number) => void
+  publicId: string
 ): Promise<UploadedPhoto> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest()
@@ -45,10 +44,6 @@ async function uploadFile(
     form.append('file', file)
     form.append('upload_preset', UPLOAD_PRESET)
     form.append('public_id', publicId)
-
-    xhr.upload.addEventListener('progress', (e) => {
-      if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100))
-    })
 
     xhr.addEventListener('load', () => {
       if (xhr.status >= 200 && xhr.status < 300) {
@@ -103,7 +98,7 @@ export function useCloudinaryUpload() {
       itemName: string,
       files: File[]
     ): Promise<void> => {
-      const itemKey = itemName
+      const itemKey = `${batchId}/${itemName}`
 
       setBatch((prev) =>
         prev
@@ -132,7 +127,7 @@ export function useCloudinaryUpload() {
         const file = files[i]
         const publicId = `resell-agent/${batchId}/${itemName}/${i}`
         try {
-          const photo = await uploadFile(file, publicId, () => {})
+          const photo = await uploadFile(file, publicId)
           photos.push(photo)
           setBatch((prev) =>
             prev
@@ -198,7 +193,11 @@ export function useCloudinaryUpload() {
         await uploadItem(batchId, item.name, item.files)
       }
 
-      setBatch((prev) => (prev ? { ...prev, overallStatus: 'done' } : prev))
+      setBatch((prev) => {
+        if (!prev) return prev
+        const allFailed = Object.values(prev.items).every((i) => i.status === 'error')
+        return { ...prev, overallStatus: allFailed ? 'error' : 'done' }
+      })
 
       // Trigger vision pipeline
       setBatch((prev) => (prev ? { ...prev, triggerStatus: 'pending' } : prev))
