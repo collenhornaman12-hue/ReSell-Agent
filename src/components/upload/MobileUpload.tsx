@@ -21,6 +21,7 @@ export function MobileUpload() {
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const sessionCounterRef = useRef(1)
   const pendingCaptureSessionRef = useRef<string | null>(null)
+  const allPreviewUrlsRef = useRef<Set<string>>(new Set())
   const { batch, uploadBatch, overallPercent, reset } = useCloudinaryUpload()
 
   const activeSession = sessions.find((s) => s.id === activeSessionId) ?? null
@@ -39,11 +40,13 @@ export function MobileUpload() {
       const files = Array.from(e.target.files ?? []).filter((f) => ACCEPTED.includes(f.type))
       if (files.length === 0) return
 
+      const newPreviews = files.map((f) => URL.createObjectURL(f))
+      newPreviews.forEach((url) => allPreviewUrlsRef.current.add(url))
+
       setSessions((prev) =>
         prev.map((s) => {
           if (s.id !== targetId) return s
-          const previews = files.map((f) => URL.createObjectURL(f))
-          return { ...s, files: [...s.files, ...files], previews: [...s.previews, ...previews] }
+          return { ...s, files: [...s.files, ...files], previews: [...s.previews, ...newPreviews] }
         })
       )
 
@@ -60,6 +63,7 @@ export function MobileUpload() {
 
   const handleReset = useCallback(() => {
     sessions.forEach((s) => s.previews.forEach((url) => URL.revokeObjectURL(url)))
+    allPreviewUrlsRef.current.clear()
     reset()
     setSessions([])
     setActiveSessionId(null)
@@ -67,9 +71,9 @@ export function MobileUpload() {
   }, [sessions, reset])
 
   useEffect(() => {
-    const urls = sessions.flatMap((s) => s.previews)
-    return () => urls.forEach((url) => URL.revokeObjectURL(url))
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => {
+      allPreviewUrlsRef.current.forEach((url) => URL.revokeObjectURL(url))
+    }
   }, [])
 
   const isUploading = batch?.overallStatus === 'uploading'
