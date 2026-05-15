@@ -64,11 +64,14 @@ async function uploadFile(
   })
 }
 
-async function triggerVisionPipeline(batchId: string): Promise<void> {
+async function triggerVisionPipeline(
+  batchId: string,
+  items: Array<{ item_name_seed: string; photo_urls: string[] }>
+): Promise<void> {
   const res = await fetch('/api/vision/trigger', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ batch_id: batchId }),
+    body: JSON.stringify({ batch_id: batchId, items }),
   })
   if (!res.ok) {
     const text = await res.text().catch(() => res.statusText)
@@ -97,7 +100,7 @@ export function useCloudinaryUpload() {
       batchId: string,
       itemName: string,
       files: File[]
-    ): Promise<void> => {
+    ): Promise<UploadedPhoto[]> => {
       const itemKey = `${batchId}/${itemName}`
 
       setBatch((prev) =>
@@ -178,6 +181,8 @@ export function useCloudinaryUpload() {
             }
           : prev
       )
+
+      return photos
     },
     []
   )
@@ -188,9 +193,17 @@ export function useCloudinaryUpload() {
 
       setBatch((prev) => (prev ? { ...prev, overallStatus: 'uploading' } : prev))
 
+      const triggerItems: Array<{ item_name_seed: string; photo_urls: string[] }> = []
+
       for (const item of items) {
         if (abortRef.current) break
-        await uploadItem(batchId, item.name, item.files)
+        const photos = await uploadItem(batchId, item.name, item.files)
+        if (photos.length > 0) {
+          triggerItems.push({
+            item_name_seed: item.name,
+            photo_urls: photos.map((p) => p.secureUrl),
+          })
+        }
       }
 
       setBatch((prev) => {
@@ -199,10 +212,9 @@ export function useCloudinaryUpload() {
         return { ...prev, overallStatus: allFailed ? 'error' : 'done' }
       })
 
-      // Trigger vision pipeline
       setBatch((prev) => (prev ? { ...prev, triggerStatus: 'pending' } : prev))
       try {
-        await triggerVisionPipeline(batchId)
+        await triggerVisionPipeline(batchId, triggerItems)
         setBatch((prev) => (prev ? { ...prev, triggerStatus: 'success' } : prev))
       } catch (err) {
         setBatch((prev) =>
