@@ -28,7 +28,7 @@ export function MobileUpload() {
 
   const handleNewItem = useCallback(() => {
     const id = crypto.randomUUID()
-    const name = `Item ${sessionCounterRef.current++}`
+    const name = `session_${sessionCounterRef.current++}`
     setSessions((prev) => [...prev, { id, name, files: [], previews: [] }])
     setActiveSessionId(id)
   }, [])
