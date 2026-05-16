@@ -4,3 +4,5 @@ dist/
 .next/
 .cloudflare/
 workers/**/.dev.vars
+workers/**/.wrangler/
+.claude/
