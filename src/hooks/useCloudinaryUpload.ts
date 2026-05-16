@@ -28,6 +28,7 @@ export interface BatchState {
   overallStatus: 'idle' | 'uploading' | 'done' | 'error'
   triggerStatus: 'idle' | 'pending' | 'success' | 'error'
   triggerError?: string
+  expectedItemCount: number
 }
 
 function makeThumbnailUrl(secureUrl: string): string {
@@ -64,16 +65,21 @@ async function uploadFile(
   })
 }
 
-async function triggerVisionPipeline(batchId: string): Promise<void> {
+async function triggerVisionPipeline(
+  batchId: string,
+  items: Array<{ item_name_seed: string; photo_urls: string[] }>
+): Promise<number> {
   const res = await fetch('/api/vision/trigger', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ batch_id: batchId }),
+    body: JSON.stringify({ batch_id: batchId, items }),
   })
   if (!res.ok) {
     const text = await res.text().catch(() => res.statusText)
     throw new Error(`Vision trigger failed (${res.status}): ${text}`)
   }
+  const data = (await res.json()) as { status: string; item_count: number }
+  return data.item_count ?? 0
 }
 
 export function useCloudinaryUpload() {
@@ -87,6 +93,7 @@ export function useCloudinaryUpload() {
       items: {},
       overallStatus: 'idle',
       triggerStatus: 'idle',
+      expectedItemCount: 0,
     })
     abortRef.current = false
     return batchId
@@ -97,7 +104,7 @@ export function useCloudinaryUpload() {
       batchId: string,
       itemName: string,
       files: File[]
-    ): Promise<void> => {
+    ): Promise<UploadedPhoto[]> => {
       const itemKey = `${batchId}/${itemName}`
 
       setBatch((prev) =>
@@ -178,6 +185,8 @@ export function useCloudinaryUpload() {
             }
           : prev
       )
+
+      return photos
     },
     []
   )
@@ -188,9 +197,17 @@ export function useCloudinaryUpload() {
 
       setBatch((prev) => (prev ? { ...prev, overallStatus: 'uploading' } : prev))
 
+      const triggerItems: Array<{ item_name_seed: string; photo_urls: string[] }> = []
+
       for (const item of items) {
         if (abortRef.current) break
-        await uploadItem(batchId, item.name, item.files)
+        const photos = await uploadItem(batchId, item.name, item.files)
+        if (photos.length > 0) {
+          triggerItems.push({
+            item_name_seed: item.name,
+            photo_urls: photos.map((p) => p.secureUrl),
+          })
+        }
       }
 
       setBatch((prev) => {
@@ -199,11 +216,12 @@ export function useCloudinaryUpload() {
         return { ...prev, overallStatus: allFailed ? 'error' : 'done' }
       })
 
-      // Trigger vision pipeline
       setBatch((prev) => (prev ? { ...prev, triggerStatus: 'pending' } : prev))
       try {
-        await triggerVisionPipeline(batchId)
-        setBatch((prev) => (prev ? { ...prev, triggerStatus: 'success' } : prev))
+        const itemCount = await triggerVisionPipeline(batchId, triggerItems)
+        setBatch((prev) =>
+          prev ? { ...prev, triggerStatus: 'success', expectedItemCount: itemCount } : prev
+        )
       } catch (err) {
         setBatch((prev) =>
           prev
