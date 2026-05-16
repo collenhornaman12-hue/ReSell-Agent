@@ -14,7 +14,7 @@ interface PollState {
   error: string | null
 }
 
-export function useBatchPolling(batchId: string | null) {
+export function useBatchPolling(batchId: string | null, expectedCount: number) {
   const [state, setState] = useState<PollState>({ items: [], isDone: false, error: null })
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -23,8 +23,7 @@ export function useBatchPolling(batchId: string | null) {
       const res = await fetch(`/api/vision/status?batch_id=${encodeURIComponent(id)}`)
       if (!res.ok) throw new Error(`Poll failed: ${res.status}`)
       const items = (await res.json()) as PollStatusItem[]
-      const isDone =
-        items.length > 0 && items.every((i) => i.status === 'PendingReview')
+      const isDone = expectedCount > 0 && items.length >= expectedCount
       setState({ items, isDone, error: null })
       return isDone
     } catch (err) {
@@ -34,7 +33,7 @@ export function useBatchPolling(batchId: string | null) {
       }))
       return false
     }
-  }, [])
+  }, [expectedCount])
 
   useEffect(() => {
     if (!batchId) {

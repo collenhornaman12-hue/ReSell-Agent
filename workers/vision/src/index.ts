@@ -24,24 +24,7 @@ async function processItems(
   for (let offset = 0; offset < items.length; offset += CHUNK_SIZE) {
     const chunk = items.slice(offset, offset + CHUNK_SIZE)
     for (const item of chunk) {
-      let extracted: VisionExtracted
-      try {
-        extracted = await extractItem(item, env)
-      } catch {
-        extracted = {
-          item_name: item.item_name_seed,
-          brand: null,
-          model_number: null,
-          category: 'Other',
-          subcategory: null,
-          condition_raw: 'Good',
-          condition_ebay: 'Good',
-          condition_notes: 'Vision unable to identify',
-          is_complete: true,
-          keywords: [] as string[],
-          identification_confidence: 'Low',
-        }
-      }
+      const extracted: VisionExtracted = await extractItem(item, env)
 
       const record: ItemInsert = {
         ...extracted,

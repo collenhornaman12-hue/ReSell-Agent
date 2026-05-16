@@ -25,7 +25,7 @@ export function MobileUpload() {
   const allPreviewUrlsRef = useRef<Set<string>>(new Set())
   const { batch, uploadBatch, overallPercent, reset } = useCloudinaryUpload()
   const batchId = batch?.triggerStatus === 'success' ? batch.batchId : null
-  const { items: visionItems, isDone: visionDone } = useBatchPolling(batchId)
+  const { items: visionItems, isDone: visionDone } = useBatchPolling(batchId, batch?.expectedItemCount ?? 0)
 
   const activeSession = sessions.find((s) => s.id === activeSessionId) ?? null
 
