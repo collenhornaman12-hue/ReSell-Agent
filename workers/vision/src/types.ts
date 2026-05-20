@@ -41,6 +41,7 @@ export interface ItemInsert {
   is_complete: boolean
   keywords: string[]
   identification_confidence: 'High' | 'Medium' | 'Low'
+  batch_id: string | null
   status: 'PendingReview'
   created_by: 'system'
   ebay_price: null
@@ -61,3 +62,5 @@ export interface StatusItem {
   status: string
   photos: string[]
 }
+
+export type Item = Record<string, unknown>

@@ -29,6 +29,7 @@ async function processItems(
       const record: ItemInsert = {
         ...extracted,
         photos: item.photo_urls,
+        batch_id: batchId,
         status: 'PendingReview',
         created_by: 'system',
         ebay_price: null,

@@ -11,7 +11,8 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/api': 'http://localhost:8787',
+      '/api/pricing': 'http://localhost:8788',
+      '/api/vision': 'http://localhost:8787',
     },
   },
 })
