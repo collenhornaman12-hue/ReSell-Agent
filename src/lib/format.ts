@@ -11,6 +11,6 @@ export function formatRelativeTime(dateStr: string | null | undefined): string {
 }
 
 export function formatPrice(price: number | null | undefined): string {
-  if (price == null) return '—'
+  if (price == null || !Number.isFinite(price)) return '—'
   return `$${price.toFixed(2)}`
 }

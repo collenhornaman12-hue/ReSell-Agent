@@ -1,6 +1,6 @@
 import { type ReactNode, useState } from 'react'
 import { X } from 'lucide-react'
-import { Sheet, SheetContent, SheetClose } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetClose, SheetTitle } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Item, ItemStatus } from '@/hooks/useInventory'
 import { formatPrice } from '@/lib/format'
@@ -26,12 +26,12 @@ export function ItemDrawer({ item, onClose, updateItemStatus }: ItemDrawerProps)
   return (
     <>
       <Sheet open={item !== null} onOpenChange={(open) => { if (!open) onClose() }}>
-        <SheetContent>
+        <SheetContent aria-describedby={undefined}>
           {item && (
             <>
               {/* Header */}
               <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0">
-                <h2 className="text-base font-semibold truncate pr-4">{item.item_name}</h2>
+                <SheetTitle className="text-base font-semibold truncate pr-4">{item.item_name}</SheetTitle>
                 <SheetClose asChild>
                   <Button variant="ghost" size="icon" className="flex-shrink-0">
                     <X className="h-4 w-4" />
@@ -103,9 +103,9 @@ export function ItemDrawer({ item, onClose, updateItemStatus }: ItemDrawerProps)
                 {item.status === 'ReadyToList' && (
                   <div className="flex gap-2">
                     <Button
-                      onClick={() =>
-                        console.log('TODO: Prompt 7 — publish to eBay', item.item_id)
-                      }
+                      onClick={() => {
+                        // TODO: Prompt 7 — wire to listing engine
+                      }}
                     >
                       Publish to eBay
                     </Button>

@@ -16,16 +16,23 @@ function MetricCard({ label, value }: MetricCardProps) {
 }
 
 export function MetricsStrip() {
-  const { metrics, loading } = useInventoryContext()
+  const { metrics, loading, error } = useInventoryContext()
   const ph = '…'
 
   return (
-    <div className="flex gap-3 px-6 py-4 border-b border-border overflow-x-auto">
-      <MetricCard label="Total Items" value={loading ? ph : metrics.total} />
-      <MetricCard label="Listed Value" value={loading ? ph : formatPrice(metrics.listedValue)} />
-      <MetricCard label="Pending Review" value={loading ? ph : metrics.pendingReview} />
-      <MetricCard label="Listed" value={loading ? ph : metrics.listed} />
-      <MetricCard label="Sold" value={loading ? ph : metrics.sold} />
+    <div className="flex flex-col border-b border-border">
+      {error && (
+        <div className="px-6 py-2 bg-destructive/10 text-destructive text-xs">
+          Failed to load inventory: {error}
+        </div>
+      )}
+      <div className="flex gap-3 px-6 py-4 overflow-x-auto">
+        <MetricCard label="Total Items" value={loading ? ph : metrics.total} />
+        <MetricCard label="Listed Value" value={loading ? ph : formatPrice(metrics.listedValue)} />
+        <MetricCard label="Pending Review" value={loading ? ph : metrics.pendingReview} />
+        <MetricCard label="Listed" value={loading ? ph : metrics.listed} />
+        <MetricCard label="Sold" value={loading ? ph : metrics.sold} />
+      </div>
     </div>
   )
 }
