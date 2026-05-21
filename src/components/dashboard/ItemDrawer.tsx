@@ -1,8 +1,9 @@
-import { type ReactNode, useState } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
 import { X } from 'lucide-react'
 import { Sheet, SheetContent, SheetClose, SheetTitle } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Item, ItemStatus } from '@/hooks/useInventory'
+import { useInventoryContext } from '@/context/InventoryContext'
 import { formatPrice } from '@/lib/format'
 
 interface ItemDrawerProps {
@@ -21,7 +22,38 @@ function FieldRow({ label, value }: { label: string; value: ReactNode }) {
 }
 
 export function ItemDrawer({ item, onClose, updateItemStatus }: ItemDrawerProps) {
+  const { refresh } = useInventoryContext()
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null)
+  const [publishing, setPublishing] = useState(false)
+  const [publishError, setPublishError] = useState<string | null>(null)
+
+  useEffect(() => {
+    setPublishError(null)
+  }, [item?.item_id])
+
+  async function publishToEbay() {
+    if (!item) return
+    setPublishing(true)
+    setPublishError(null)
+    try {
+      const res = await fetch('/api/listing/trigger', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ item_id: item.item_id }),
+      })
+      const data = (await res.json()) as { ok?: boolean; error?: string }
+      if (!res.ok || data.error) {
+        setPublishError(data.error ?? `Error ${res.status}`)
+        return
+      }
+      await refresh()
+      onClose()
+    } catch (e) {
+      setPublishError((e as Error).message)
+    } finally {
+      setPublishing(false)
+    }
+  }
 
   return (
     <>
@@ -101,22 +133,24 @@ export function ItemDrawer({ item, onClose, updateItemStatus }: ItemDrawerProps)
               {/* Actions */}
               <div className="px-6 py-4 border-t border-border flex-shrink-0">
                 {item.status === 'ReadyToList' && (
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={() => {
-                        // TODO: Prompt 7 — wire to listing engine
-                      }}
-                    >
-                      Publish to eBay
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() =>
-                        void updateItemStatus(item.item_id, 'Archived').then(onClose)
-                      }
-                    >
-                      Archive
-                    </Button>
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <Button onClick={() => void publishToEbay()} disabled={publishing}>
+                        {publishing ? 'Publishing…' : 'Publish to eBay'}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        disabled={publishing}
+                        onClick={() =>
+                          void updateItemStatus(item.item_id, 'Archived').then(onClose)
+                        }
+                      >
+                        Archive
+                      </Button>
+                    </div>
+                    {publishError && (
+                      <p className="text-xs text-destructive">{publishError}</p>
+                    )}
                   </div>
                 )}
                 {item.status === 'Listed' && item.ebay_listing_id && (
