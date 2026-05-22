@@ -32,6 +32,7 @@ export function MetricsStrip() {
         <MetricCard label="Pending Review" value={loading ? ph : metrics.pendingReview} />
         <MetricCard label="Listed" value={loading ? ph : metrics.listed} />
         <MetricCard label="Sold" value={loading ? ph : metrics.sold} />
+        <MetricCard label="Archived" value={loading ? ph : metrics.archived} />
       </div>
     </div>
   )

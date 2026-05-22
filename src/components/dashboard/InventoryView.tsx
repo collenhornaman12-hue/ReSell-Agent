@@ -1,11 +1,12 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useInventoryContext } from '@/context/InventoryContext'
 import { Item } from '@/hooks/useInventory'
 import { ItemsTable } from './ItemsTable'
 import { ItemDrawer } from './ItemDrawer'
 import { Select } from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
 
-const STATUS_OPTIONS = ['All', 'PendingReview', 'ReadyToList', 'Listed', 'Sold', 'Archived']
+const STATUS_OPTIONS = ['Active', 'All', 'PendingReview', 'ReadyToList', 'Listed', 'Sold']
 const CATEGORY_OPTIONS = [
   'All',
   'Toys & Hobbies',
@@ -18,21 +19,45 @@ const CONFIDENCE_OPTIONS = ['All', 'High', 'Medium', 'Low']
 
 export function InventoryView() {
   const { items, loading, updateItemStatus } = useInventoryContext()
-  const [statusFilter, setStatusFilter] = useState('All')
+  const [statusFilter, setStatusFilter] = useState('Active')
   const [categoryFilter, setCategoryFilter] = useState('All')
   const [confidenceFilter, setConfidenceFilter] = useState('All')
   const [selectedItem, setSelectedItem] = useState<Item | null>(null)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   const filtered = useMemo(
     () =>
       items.filter((i) => {
-        if (statusFilter !== 'All' && i.status !== statusFilter) return false
+        if (statusFilter === 'Active' && i.status === 'Archived') return false
+        if (statusFilter !== 'Active' && statusFilter !== 'All' && i.status !== statusFilter) return false
         if (categoryFilter !== 'All' && i.category !== categoryFilter) return false
         if (confidenceFilter !== 'All' && i.price_confidence !== confidenceFilter) return false
         return true
       }),
     [items, statusFilter, categoryFilter, confidenceFilter]
   )
+
+  useEffect(() => {
+    setSelectedIds(new Set())
+  }, [statusFilter, categoryFilter, confidenceFilter])
+
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function toggleAll(allSelected: boolean) {
+    setSelectedIds(allSelected ? new Set(filtered.map((i) => i.item_id)) : new Set())
+  }
+
+  async function archiveSelected() {
+    await Promise.all([...selectedIds].map((id) => updateItemStatus(id, 'Archived')))
+    setSelectedIds(new Set())
+  }
 
   return (
     <div className="px-6 py-4">
@@ -76,9 +101,22 @@ export function InventoryView() {
         <span className="text-xs text-muted-foreground ml-auto">
           {filtered.length} item{filtered.length !== 1 ? 's' : ''}
         </span>
+
+        {selectedIds.size > 0 && (
+          <Button size="sm" variant="destructive" onClick={() => void archiveSelected()}>
+            Archive Selected ({selectedIds.size})
+          </Button>
+        )}
       </div>
 
-      <ItemsTable items={filtered} loading={loading} onRowClick={setSelectedItem} />
+      <ItemsTable
+        items={filtered}
+        loading={loading}
+        onRowClick={setSelectedItem}
+        selectedIds={selectedIds}
+        onToggleSelect={toggleSelect}
+        onToggleAll={toggleAll}
+      />
 
       <ItemDrawer
         item={selectedItem}
