@@ -5,6 +5,7 @@ import { MetricsStrip } from '@/components/dashboard/MetricsStrip'
 import { InventoryView } from '@/components/dashboard/InventoryView'
 import { ReviewQueue } from '@/components/dashboard/ReviewQueue'
 import { UploadPage } from '@/components/upload/UploadPage'
+import { ArchivedView } from '@/components/dashboard/ArchivedView'
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
               <Route path="/" element={<Navigate to="/inventory" replace />} />
               <Route path="/inventory" element={<InventoryView />} />
               <Route path="/review" element={<ReviewQueue />} />
+              <Route path="/archived" element={<ArchivedView />} />
               <Route path="/upload" element={<UploadPage />} />
             </Routes>
           </main>

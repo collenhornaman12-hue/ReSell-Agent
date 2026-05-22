@@ -67,6 +67,7 @@ export interface Metrics {
   pendingReview: number
   listed: number
   sold: number
+  archived: number
 }
 
 export interface UseInventoryReturn {
@@ -75,6 +76,7 @@ export interface UseInventoryReturn {
   loading: boolean
   error: string | null
   updateItemStatus: (item_id: string, newStatus: ItemStatus) => Promise<void>
+  deleteItem: (item_id: string) => Promise<void>
   refresh: () => Promise<void>
 }
 
@@ -92,6 +94,7 @@ function computeMetrics(items: Item[]): Metrics {
     ).length,
     listed: items.filter((i) => i.status === 'Listed').length,
     sold: items.filter((i) => i.status === 'Sold').length,
+    archived: items.filter((i) => i.status === 'Archived').length,
   }
 }
 
@@ -142,12 +145,22 @@ export function useInventory(): UseInventoryReturn {
     [refresh]
   )
 
+  const deleteItem = useCallback(
+    async (item_id: string) => {
+      const { error: err } = await supabase.from('items').delete().eq('item_id', item_id)
+      if (err) throw new Error(err.message)
+      await refresh()
+    },
+    [refresh]
+  )
+
   return {
     items,
     metrics: computeMetrics(items),
     loading,
     error,
     updateItemStatus,
+    deleteItem,
     refresh,
   }
 }

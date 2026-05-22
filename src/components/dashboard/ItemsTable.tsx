@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { cn } from '@/lib/utils'
 import { formatPrice, formatRelativeTime } from '@/lib/format'
 import { Item } from '@/hooks/useInventory'
@@ -17,6 +18,11 @@ interface ItemsTableProps {
   showActions?: boolean
   onApprove?: (id: string) => void
   onReject?: (id: string) => void
+  onRestore?: (id: string) => void
+  onDelete?: (id: string) => void
+  selectedIds?: Set<string>
+  onToggleSelect?: (id: string) => void
+  onToggleAll?: (allSelected: boolean) => void
   loading?: boolean
 }
 
@@ -55,8 +61,24 @@ export function ItemsTable({
   showActions = false,
   onApprove,
   onReject,
+  onRestore,
+  onDelete,
+  selectedIds,
+  onToggleSelect,
+  onToggleAll,
   loading = false,
 }: ItemsTableProps) {
+  const headerCheckboxRef = useRef<HTMLInputElement>(null)
+  const hasCheckboxes = selectedIds !== undefined
+  const allSelected = hasCheckboxes && items.length > 0 && selectedIds.size === items.length
+  const someSelected = hasCheckboxes && selectedIds.size > 0 && selectedIds.size < items.length
+
+  useEffect(() => {
+    if (headerCheckboxRef.current) {
+      headerCheckboxRef.current.indeterminate = someSelected
+    }
+  }, [someSelected])
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16 text-muted-foreground text-sm">
@@ -77,6 +99,17 @@ export function ItemsTable({
     <Table>
       <TableHeader>
         <TableRow className="hover:bg-transparent cursor-default">
+          {hasCheckboxes && (
+            <TableHead className="w-10">
+              <input
+                ref={headerCheckboxRef}
+                type="checkbox"
+                className="h-4 w-4 rounded border-border cursor-pointer accent-primary"
+                checked={allSelected}
+                onChange={(e) => onToggleAll?.(e.target.checked)}
+              />
+            </TableHead>
+          )}
           <TableHead className="w-16">Photo</TableHead>
           <TableHead>Item Name</TableHead>
           <TableHead>Brand</TableHead>
@@ -92,6 +125,16 @@ export function ItemsTable({
       <TableBody>
         {items.map((item) => (
           <TableRow key={item.item_id} onClick={() => onRowClick(item)}>
+            {hasCheckboxes && (
+              <TableCell onClick={(e) => e.stopPropagation()}>
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 rounded border-border cursor-pointer accent-primary"
+                  checked={selectedIds.has(item.item_id)}
+                  onChange={() => onToggleSelect?.(item.item_id)}
+                />
+              </TableCell>
+            )}
             <TableCell>
               {item.photos?.[0] ? (
                 <img
@@ -123,22 +166,46 @@ export function ItemsTable({
             {showActions && (
               <TableCell onClick={(e) => e.stopPropagation()}>
                 <div className="flex gap-1">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-7 text-xs"
-                    onClick={() => onApprove?.(item.item_id)}
-                  >
-                    Approve
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    className="h-7 text-xs"
-                    onClick={() => onReject?.(item.item_id)}
-                  >
-                    Reject
-                  </Button>
+                  {onRestore && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-xs"
+                      onClick={() => onRestore(item.item_id)}
+                    >
+                      Restore
+                    </Button>
+                  )}
+                  {onDelete && (
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="h-7 text-xs"
+                      onClick={() => onDelete(item.item_id)}
+                    >
+                      Delete
+                    </Button>
+                  )}
+                  {onApprove && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-xs"
+                      onClick={() => onApprove(item.item_id)}
+                    >
+                      Approve
+                    </Button>
+                  )}
+                  {onReject && (
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="h-7 text-xs"
+                      onClick={() => onReject(item.item_id)}
+                    >
+                      Reject
+                    </Button>
+                  )}
                 </div>
               </TableCell>
             )}
