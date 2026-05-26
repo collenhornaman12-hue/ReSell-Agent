@@ -7,9 +7,9 @@ const BANNED = /\b(rare|vintage|look|must\s*see)\b/gi
 const CONDITION_ENUM: Record<string, string> = {
   'New': 'NEW',
   'Brand New': 'NEW',
-  'Like New': 'LIKE_NEW',
-  'Mint': 'LIKE_NEW',
-  'Near Mint': 'LIKE_NEW',
+  'Like New': 'USED_EXCELLENT',
+  'Mint': 'USED_EXCELLENT',
+  'Near Mint': 'USED_EXCELLENT',
   'Very Good': 'USED_VERY_GOOD',
   'Excellent': 'USED_EXCELLENT',
   'Good': 'USED_GOOD',
@@ -93,9 +93,11 @@ async function upsertInventoryItem(env: Env, token: string, item: ReadyItem): Pr
       title,
       description,
       imageUrls,
-      aspects: item.keywords?.length
-        ? { Keywords: item.keywords.slice(0, 10) }
-        : undefined,
+      aspects: {
+        ...(item.keywords?.length ? { Keywords: item.keywords.slice(0, 10) } : {}),
+        Type: [item.subcategory ?? 'Action Figure'],
+        Brand: [item.brand ?? 'Unknown'],
+      },
     },
   }
 
@@ -140,7 +142,8 @@ async function createOrGetOffer(env: Env, token: string, item: ReadyItem): Promi
     token,
     'POST',
     '/sell/inventory/v1/offer',
-    offerPayload
+    offerPayload,
+    { 'Content-Language': 'en-US' }
   )
 
   if (status === 201) {

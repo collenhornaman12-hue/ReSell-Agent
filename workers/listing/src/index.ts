@@ -16,6 +16,7 @@ function json(body: unknown, status = 200): Response {
 }
 
 async function handleItem(env: Env, itemId: string): Promise<Response> {
+  console.log('handleItem called for: ' + itemId)
   const envErr = validateEnv(env)
   if (envErr) return json({ error: envErr }, 422)
 
@@ -34,6 +35,7 @@ async function handleItem(env: Env, itemId: string): Promise<Response> {
     await markListed(env, item.item_id, result.listingId)
     return json({ ok: true, item_id: item.item_id, listingId: result.listingId })
   } catch (e) {
+    console.error('listItem failed:', e)
     return json({ error: (e as Error).message }, 502)
   }
 }
