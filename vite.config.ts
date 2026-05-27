@@ -10,6 +10,7 @@ export default defineConfig({
     },
   },
   server: {
+    host: true,
     proxy: {
       '/api/listing': 'http://localhost:8789',
       '/api/pricing': 'http://localhost:8788',
