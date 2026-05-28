@@ -8,6 +8,7 @@ import {
   updateItemBundleMode,
 } from './supabase'
 import type { Env, PendingItem, PricedItem } from './types'
+import { checkRateLimit } from '../../shared/rateLimit'
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -228,6 +229,11 @@ export default {
     const token = request.headers.get('X-Worker-Token')
     if (token !== env.WORKER_SECRET) {
       return new Response('Unauthorized', { status: 401 })
+    }
+
+    const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown'
+    if (!checkRateLimit(ip, 10)) {
+      return new Response('Too Many Requests', { status: 429 })
     }
 
     if (request.method === 'POST' && url.pathname === '/api/pricing/trigger') {

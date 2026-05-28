@@ -1,6 +1,7 @@
 import type { Env } from './types'
 import { validateEnv, validateItem, listItem, shouldAutoPublish } from './ebay-api'
 import { fetchItem, fetchReadyToListByBatch, markListed } from './supabase'
+import { checkRateLimit } from '../../shared/rateLimit'
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -62,6 +63,11 @@ export default {
     const token = request.headers.get('X-Worker-Token')
     if (token !== env.WORKER_SECRET) {
       return new Response('Unauthorized', { status: 401 })
+    }
+
+    const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown'
+    if (!checkRateLimit(ip, 20)) {
+      return new Response('Too Many Requests', { status: 429 })
     }
 
     const url = new URL(request.url)
