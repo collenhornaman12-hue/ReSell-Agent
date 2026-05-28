@@ -71,7 +71,10 @@ async function triggerVisionPipeline(
 ): Promise<number> {
   const res = await fetch('/api/vision/trigger', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Worker-Token': import.meta.env.VITE_WORKER_SECRET,
+    },
     body: JSON.stringify({ batch_id: batchId, items }),
   })
   if (!res.ok) {
@@ -217,6 +220,7 @@ export function useCloudinaryUpload() {
       })
 
       setBatch((prev) => (prev ? { ...prev, triggerStatus: 'pending' } : prev))
+      console.log('[upload] triggerItems:', JSON.stringify(triggerItems, null, 2))
       try {
         const itemCount = await triggerVisionPipeline(batchId, triggerItems)
         setBatch((prev) =>

@@ -59,6 +59,11 @@ export default {
       return new Response(null, { status: 204, headers: CORS })
     }
 
+    const token = request.headers.get('X-Worker-Token')
+    if (token !== env.WORKER_SECRET) {
+      return new Response('Unauthorized', { status: 401 })
+    }
+
     const url = new URL(request.url)
     if (url.pathname !== '/api/listing/trigger' || request.method !== 'POST') {
       return json({ error: 'Not found' }, 404)

@@ -3,5 +3,8 @@ main = "src/index.ts"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 
+[vars]
+# WORKER_SECRET — set via .dev.vars locally; add as a Cloudflare Secret in production (do not hardcode here)
+
 [dev]
 port = 8789

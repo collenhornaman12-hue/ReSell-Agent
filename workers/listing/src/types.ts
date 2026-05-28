@@ -1,6 +1,7 @@
 export interface Env {
   SUPABASE_URL: string
   SUPABASE_SERVICE_ROLE_KEY: string
+  WORKER_SECRET: string
   EBAY_CLIENT_ID: string
   EBAY_CLIENT_SECRET: string
   EBAY_USER_REFRESH_TOKEN: string

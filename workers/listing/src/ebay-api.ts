@@ -10,7 +10,7 @@ const CONDITION_ENUM: Record<string, string> = {
   'Like New': 'USED_EXCELLENT',
   'Mint': 'USED_EXCELLENT',
   'Near Mint': 'USED_EXCELLENT',
-  'Very Good': 'USED_VERY_GOOD',
+  'Very Good': 'USED_EXCELLENT',
   'Excellent': 'USED_EXCELLENT',
   'Good': 'USED_GOOD',
   'Acceptable': 'USED_ACCEPTABLE',
@@ -150,9 +150,13 @@ async function createOrGetOffer(env: Env, token: string, item: ReadyItem): Promi
     return (data as { offerId: string }).offerId
   }
 
-  // errorId 25002: offer already exists for this SKU — retrieve and reuse it
-  const errors = (data as { errors?: Array<{ errorId: number }> }).errors ?? []
-  if (errors.some((e) => e.errorId === 25002)) {
+  // errorId 25002: offer already exists — eBay returns the offerId in the error parameters
+  const errors = (data as { errors?: Array<{ errorId: number; parameters?: Array<{ name: string; value: string }> }> }).errors ?? []
+  const dup = errors.find((e) => e.errorId === 25002)
+  if (dup) {
+    const offerId = dup.parameters?.find((p) => p.name === 'offerId')?.value
+    if (offerId) return offerId
+    // fallback: retrieve via GET if the parameter wasn't present
     const listRes = await ebayRequest(
       env,
       token,

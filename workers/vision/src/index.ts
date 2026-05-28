@@ -64,6 +64,11 @@ export default {
       return new Response(null, { status: 204, headers: CORS_HEADERS })
     }
 
+    const token = request.headers.get('X-Worker-Token')
+    if (token !== env.WORKER_SECRET) {
+      return new Response('Unauthorized', { status: 401 })
+    }
+
     if (request.method === 'POST' && url.pathname === '/api/vision/trigger') {
       let payload: TriggerPayload
       try {

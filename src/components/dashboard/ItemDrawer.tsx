@@ -26,10 +26,28 @@ export function ItemDrawer({ item, onClose, updateItemStatus }: ItemDrawerProps)
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null)
   const [publishing, setPublishing] = useState(false)
   const [publishError, setPublishError] = useState<string | null>(null)
+  const [unarchiving, setUnarchiving] = useState(false)
+  const [unarchiveError, setUnarchiveError] = useState<string | null>(null)
 
   useEffect(() => {
     setPublishError(null)
+    setUnarchiveError(null)
   }, [item?.item_id])
+
+  async function unarchiveItem() {
+    if (!item) return
+    setUnarchiving(true)
+    setUnarchiveError(null)
+    try {
+      await updateItemStatus(item.item_id, 'ReadyToList')
+      await refresh()
+      onClose()
+    } catch (e) {
+      setUnarchiveError((e as Error).message)
+    } finally {
+      setUnarchiving(false)
+    }
+  }
 
   async function publishToEbay() {
     if (!item) return
@@ -38,7 +56,10 @@ export function ItemDrawer({ item, onClose, updateItemStatus }: ItemDrawerProps)
     try {
       const res = await fetch('/api/listing/trigger', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Worker-Token': import.meta.env.VITE_WORKER_SECRET,
+        },
         body: JSON.stringify({ item_id: item.item_id }),
       })
       const data = (await res.json()) as { ok?: boolean; error?: string }
@@ -179,7 +200,17 @@ export function ItemDrawer({ item, onClose, updateItemStatus }: ItemDrawerProps)
                     </p>
                   </div>
                 )}
-                {!['ReadyToList', 'Listed', 'Sold'].includes(item.status) && (
+                {item.status === 'Archived' && (
+                  <div className="space-y-2">
+                    <Button onClick={() => void unarchiveItem()} disabled={unarchiving}>
+                      {unarchiving ? 'Unarchiving…' : 'Unarchive Item'}
+                    </Button>
+                    {unarchiveError && (
+                      <p className="text-xs text-destructive">{unarchiveError}</p>
+                    )}
+                  </div>
+                )}
+                {!['ReadyToList', 'Listed', 'Sold', 'Archived'].includes(item.status) && (
                   <p className="text-xs text-muted-foreground">
                     No actions available for status: {item.status}
                   </p>

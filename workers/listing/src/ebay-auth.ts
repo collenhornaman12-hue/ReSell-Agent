@@ -4,7 +4,6 @@ let cachedToken: string | null = null
 let tokenExpiresAt = 0
 
 export async function getAccessToken(env: Env): Promise<string> {
-  console.log('RAW refresh token from env:', JSON.stringify(env.EBAY_USER_REFRESH_TOKEN))
   const now = Date.now()
   if (cachedToken && now < tokenExpiresAt - 60_000) return cachedToken
 
