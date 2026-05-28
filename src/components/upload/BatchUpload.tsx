@@ -5,71 +5,101 @@ import { OverallProgress, ItemProgress } from './UploadProgress'
 import { useCloudinaryUpload } from '@/hooks/useCloudinaryUpload'
 import { UploadCloud } from 'lucide-react'
 
-const ACCEPTED = ['image/jpeg', 'image/png', 'image/webp']
+const ACCEPTED_TYPES = new Set([
+  'image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif',
+])
+const ACCEPTED_EXTS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.heic'])
 const MAX_FILES = 1200
+
+function isAcceptedImage(f: File): boolean {
+  if (ACCEPTED_TYPES.has(f.type)) return true
+  const dot = f.name.lastIndexOf('.')
+  return dot !== -1 && ACCEPTED_EXTS.has(f.name.slice(dot).toLowerCase())
+}
 
 interface FolderItem {
   name: string
   files: File[]
 }
 
-async function readEntries(entry: FileSystemDirectoryEntry): Promise<File[]> {
+// Reads ALL direct children of a directory, handling the ≤100-per-call limit.
+async function readImmediateChildren(dir: FileSystemDirectoryEntry): Promise<FileSystemEntry[]> {
   return new Promise((resolve) => {
-    const reader = entry.createReader()
-    const files: File[] = []
+    const reader = dir.createReader()
+    const all: FileSystemEntry[] = []
     const readBatch = () => {
-      reader.readEntries((entries) => {
-        if (entries.length === 0) {
-          resolve(files)
-          return
-        }
-        const promises = entries.map((e) => {
-          if (e.isFile) {
-            return new Promise<void>((res) => {
-              ;(e as FileSystemFileEntry).file((f) => {
-                if (ACCEPTED.includes(f.type)) files.push(f)
-                res()
-              })
-            })
-          }
-          if (e.isDirectory) {
-            return readEntries(e as FileSystemDirectoryEntry).then((subFiles) => {
-              files.push(...subFiles)
-            })
-          }
-          return Promise.resolve()
-        })
-        Promise.all(promises).then(readBatch)
+      reader.readEntries((batch) => {
+        if (batch.length === 0) { resolve(all); return }
+        all.push(...batch)
+        readBatch()
       })
     }
     readBatch()
   })
 }
 
-async function extractFolderItems(dataTransfer: DataTransfer): Promise<FolderItem[]> {
-  const items = Array.from(dataTransfer.items)
-  const folderMap: Record<string, File[]> = {}
-
-  await Promise.all(
-    items.map(async (item) => {
-      const entry = item.webkitGetAsEntry()
-      if (!entry) return
-      if (entry.isDirectory) {
-        const files = await readEntries(entry as FileSystemDirectoryEntry)
-        if (files.length > 0) {
-          folderMap[entry.name] = [...(folderMap[entry.name] ?? []), ...files]
-        }
-      } else if (entry.isFile) {
-        const file = item.getAsFile()
-        if (file && ACCEPTED.includes(file.type)) {
-          const key = 'Untitled Item'
-          folderMap[key] = [...(folderMap[key] ?? []), file]
-        }
+// Recursively collects all accepted image files from a directory.
+async function readAllFiles(dir: FileSystemDirectoryEntry): Promise<File[]> {
+  const children = await readImmediateChildren(dir)
+  const groups = await Promise.all(
+    children.map(async (child): Promise<File[]> => {
+      if (child.isFile) {
+        return new Promise<File[]>((res) => {
+          ;(child as FileSystemFileEntry).file(
+            (f) => res(isAcceptedImage(f) ? [f] : []),
+            () => res([])
+          )
+        })
       }
+      if (child.isDirectory) return readAllFiles(child as FileSystemDirectoryEntry)
+      return []
     })
   )
+  return groups.flat()
+}
 
-  return Object.entries(folderMap).map(([name, files]) => ({ name, files }))
+interface ExtractResult {
+  items: FolderItem[]
+  isFolderOfFolders: boolean
+}
+
+async function extractFolderItems(dataTransfer: DataTransfer): Promise<ExtractResult> {
+  const dtItems = Array.from(dataTransfer.items)
+  const folderMap: Record<string, File[]> = {}
+
+  for (const dtItem of dtItems) {
+    const entry = dtItem.webkitGetAsEntry()
+    if (!entry) continue
+
+    if (entry.isDirectory) {
+      const children = await readImmediateChildren(entry as FileSystemDirectoryEntry)
+      const subDirs = children.filter((c) => c.isDirectory) as FileSystemDirectoryEntry[]
+
+      if (subDirs.length > 0) {
+        // Folder-of-folders: each immediate subdirectory becomes a separate item.
+        const items: FolderItem[] = []
+        for (const sub of subDirs) {
+          const files = await readAllFiles(sub)
+          if (files.length > 0) items.push({ name: sub.name, files })
+        }
+        return { items, isFolderOfFolders: true }
+      }
+
+      // Plain folder with only files — single item.
+      const files = await readAllFiles(entry as FileSystemDirectoryEntry)
+      if (files.length > 0) folderMap[entry.name] = files
+    } else if (entry.isFile) {
+      const file = dtItem.getAsFile()
+      if (file && isAcceptedImage(file)) {
+        folderMap['Untitled Item'] = [...(folderMap['Untitled Item'] ?? []), file]
+      }
+    }
+  }
+
+  return {
+    items: Object.entries(folderMap).map(([name, files]) => ({ name, files })),
+    isFolderOfFolders: false,
+  }
 }
 
 function validateItems(items: FolderItem[]): string | null {
@@ -79,10 +109,46 @@ function validateItems(items: FolderItem[]): string | null {
   return null
 }
 
+// Direct Cloudinary upload used in folder-of-folders mode (each folder has its own batchId).
+async function uploadFileDirect(
+  file: File,
+  batchId: string,
+  itemName: string,
+  index: number
+): Promise<string | null> {
+  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME as string
+  const preset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET as string
+  const publicId = `resell-agent/${batchId}/${itemName}/${index}`
+  return new Promise((resolve) => {
+    const xhr = new XMLHttpRequest()
+    const form = new FormData()
+    form.append('file', file)
+    form.append('upload_preset', preset)
+    form.append('public_id', publicId)
+    xhr.addEventListener('load', () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve((JSON.parse(xhr.responseText) as { secure_url: string }).secure_url)
+      } else {
+        resolve(null)
+      }
+    })
+    xhr.addEventListener('error', () => resolve(null))
+    xhr.open('POST', `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`)
+    xhr.send(form)
+  })
+}
+
 export function BatchUpload() {
   const [isDragOver, setIsDragOver] = useState(false)
   const [pendingItems, setPendingItems] = useState<FolderItem[]>([])
+  const [isFolderOfFolders, setIsFolderOfFolders] = useState(false)
   const [validationError, setValidationError] = useState<string | null>(null)
+  const [folderProgress, setFolderProgress] = useState<{
+    current: number
+    total: number
+    folderName: string
+  } | null>(null)
+  const [foldersDone, setFoldersDone] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const dragCounterRef = useRef(0)
   const { batch, uploadBatch, overallPercent, reset } = useCloudinaryUpload()
@@ -92,15 +158,19 @@ export function BatchUpload() {
     dragCounterRef.current = 0
     setIsDragOver(false)
     setValidationError(null)
-    const items = await extractFolderItems(e.dataTransfer)
+    setFoldersDone(false)
+    const { items, isFolderOfFolders: isFoF } = await extractFolderItems(e.dataTransfer)
     const err = validateItems(items)
     if (err) { setValidationError(err); setPendingItems([]); return }
+    setIsFolderOfFolders(isFoF)
     setPendingItems(items)
   }, [])
 
   const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setValidationError(null)
-    const files = Array.from(e.target.files ?? []).filter((f) => ACCEPTED.includes(f.type))
+    setIsFolderOfFolders(false)
+    setFoldersDone(false)
+    const files = Array.from(e.target.files ?? []).filter(isAcceptedImage)
     if (files.length === 0) { setValidationError('No valid image files selected.'); return }
     if (files.length > MAX_FILES) { setValidationError(`Too many files (${files.length}). Max is ${MAX_FILES}.`); return }
     setPendingItems([{ name: 'Uploaded Photos', files }])
@@ -108,23 +178,102 @@ export function BatchUpload() {
 
   const handleUpload = useCallback(async () => {
     if (pendingItems.length === 0) return
-    await uploadBatch(pendingItems)
-  }, [pendingItems, uploadBatch])
+
+    if (isFolderOfFolders) {
+      setFoldersDone(false)
+      for (let i = 0; i < pendingItems.length; i++) {
+        const item = pendingItems[i]
+        setFolderProgress({ current: i + 1, total: pendingItems.length, folderName: item.name })
+
+        const batchId = crypto.randomUUID()
+        const photoUrls: string[] = []
+        for (let j = 0; j < item.files.length; j++) {
+          const url = await uploadFileDirect(item.files[j], batchId, item.name, j)
+          if (url) photoUrls.push(url)
+        }
+
+        if (photoUrls.length > 0) {
+          try {
+            await fetch('/api/vision/trigger', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Worker-Token': import.meta.env.VITE_WORKER_SECRET,
+              },
+              body: JSON.stringify({
+                batch_id: batchId,
+                items: [{ item_name_seed: item.name, photo_urls: photoUrls }],
+              }),
+            })
+          } catch (err) {
+            console.error(`Vision trigger failed for folder "${item.name}":`, err)
+          }
+        }
+
+        if (i < pendingItems.length - 1) {
+          await new Promise((r) => setTimeout(r, 500))
+        }
+      }
+      setFolderProgress(null)
+      setFoldersDone(true)
+    } else {
+      await uploadBatch(pendingItems)
+    }
+  }, [pendingItems, isFolderOfFolders, uploadBatch])
 
   const handleReset = useCallback(() => {
     reset()
     setPendingItems([])
     setValidationError(null)
+    setIsFolderOfFolders(false)
+    setFolderProgress(null)
+    setFoldersDone(false)
     if (fileInputRef.current) fileInputRef.current.value = ''
   }, [reset])
 
+  const isProcessingFolders = folderProgress !== null
   const isDone = batch?.overallStatus === 'done'
   const itemsMap = batch?.items ?? {}
   const doneCount = Object.values(itemsMap).filter((i) => i.status === 'done').length
 
   return (
     <div className="space-y-4">
-      {!batch && (
+      {/* Folder-of-folders: sequential processing progress */}
+      {isProcessingFolders && (
+        <Card>
+          <CardContent className="pt-4 space-y-2">
+            <p className="text-sm font-medium">
+              Processing folder {folderProgress.current} of {folderProgress.total}:{' '}
+              <span className="text-muted-foreground">{folderProgress.folderName}</span>
+            </p>
+            <div className="h-2 rounded-full bg-muted overflow-hidden">
+              <div
+                className="h-full bg-primary transition-all duration-300"
+                style={{ width: `${(folderProgress.current / folderProgress.total) * 100}%` }}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Folder-of-folders: done state */}
+      {foldersDone && !isProcessingFolders && (
+        <Card>
+          <CardContent className="pt-4">
+            <p className="text-sm font-medium">
+              Done —{' '}
+              {pendingItems.length} folder{pendingItems.length !== 1 ? 's' : ''} submitted for
+              processing.
+            </p>
+            <Button variant="outline" onClick={handleReset} className="mt-3 w-full">
+              Start New Batch
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Drop zone + pending items preview */}
+      {!isProcessingFolders && !foldersDone && !batch && (
         <>
           <div
             onDragEnter={(e) => { e.preventDefault(); dragCounterRef.current++; setIsDragOver(true) }}
@@ -132,9 +281,7 @@ export function BatchUpload() {
             onDragLeave={() => { dragCounterRef.current--; if (dragCounterRef.current === 0) setIsDragOver(false) }}
             onDrop={handleDrop}
             className={`border-2 border-dashed rounded-lg p-10 text-center cursor-pointer transition-colors ${
-              isDragOver
-                ? 'border-primary bg-primary/5'
-                : 'border-border hover:border-primary/50'
+              isDragOver ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
             }`}
             onClick={() => fileInputRef.current?.click()}
             role="button"
@@ -142,13 +289,15 @@ export function BatchUpload() {
             onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && fileInputRef.current?.click()}
           >
             <UploadCloud className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
-            <p className="text-base font-medium">Drop folders or images here</p>
-            <p className="text-sm text-muted-foreground mt-1">Each folder becomes one item · JPG, PNG, WebP · up to 1,200 photos</p>
+            <p className="text-base font-medium">Drop a folder of folders, a folder, or images here</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Parent folder → each subfolder becomes one item · JPG, PNG, WebP, HEIC · up to 1,200 photos
+            </p>
             <input
               ref={fileInputRef}
               type="file"
               multiple
-              accept="image/jpeg,image/png,image/webp"
+              accept="image/jpeg,image/png,image/webp,image/heic,.heic"
               className="hidden"
               onChange={handleFileInput}
             />
@@ -162,24 +311,30 @@ export function BatchUpload() {
             <Card>
               <CardContent className="pt-4">
                 <p className="text-sm font-medium mb-2">
-                  Ready to upload {pendingItems.length} item(s) ·{' '}
-                  {pendingItems.reduce((s, i) => s + i.files.length, 0)} photos
+                  {isFolderOfFolders
+                    ? `Ready to process ${pendingItems.length} folder${pendingItems.length !== 1 ? 's' : ''} as separate items`
+                    : `Ready to upload ${pendingItems.length} item(s) · ${pendingItems.reduce((s, i) => s + i.files.length, 0)} photos`}
                 </p>
                 <ul className="space-y-1 mb-4">
                   {pendingItems.map((item) => (
                     <li key={item.name} className="text-sm flex justify-between">
                       <span className="truncate">{item.name}</span>
-                      <span className="text-muted-foreground ml-2">{item.files.length} photos</span>
+                      <span className="text-muted-foreground ml-2">
+                        {item.files.length} photo{item.files.length !== 1 ? 's' : ''}
+                      </span>
                     </li>
                   ))}
                 </ul>
-                <Button onClick={handleUpload} className="w-full">Start Upload</Button>
+                <Button onClick={() => void handleUpload()} className="w-full">
+                  {isFolderOfFolders ? 'Process All Folders' : 'Start Upload'}
+                </Button>
               </CardContent>
             </Card>
           )}
         </>
       )}
 
+      {/* Single-batch upload progress (existing path) */}
       {batch && (
         <div>
           <OverallProgress

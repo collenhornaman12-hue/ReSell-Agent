@@ -18,12 +18,25 @@ const CATEGORY_OPTIONS = [
 const CONFIDENCE_OPTIONS = ['All', 'High', 'Medium', 'Low']
 
 export function InventoryView() {
-  const { items, loading, updateItemStatus } = useInventoryContext()
+  const { items, loading, updateItemStatus, refresh } = useInventoryContext()
   const [statusFilter, setStatusFilter] = useState('Active')
   const [categoryFilter, setCategoryFilter] = useState('All')
   const [confidenceFilter, setConfidenceFilter] = useState('All')
   const [selectedItem, setSelectedItem] = useState<Item | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [pricing, setPricing] = useState(false)
+  const [pricingProgress, setPricingProgress] = useState<{ current: number; total: number } | null>(null)
+
+  const pendingBatchIds = useMemo(
+    () => [
+      ...new Set(
+        items
+          .filter((i) => i.status === 'PendingReview' && i.batch_id)
+          .map((i) => i.batch_id as string)
+      ),
+    ],
+    [items]
+  )
 
   const filtered = useMemo(
     () =>
@@ -52,6 +65,32 @@ export function InventoryView() {
 
   function toggleAll(allSelected: boolean) {
     setSelectedIds(allSelected ? new Set(filtered.map((i) => i.item_id)) : new Set())
+  }
+
+  async function priceAllPending() {
+    if (pendingBatchIds.length === 0) return
+    setPricing(true)
+    for (let i = 0; i < pendingBatchIds.length; i++) {
+      setPricingProgress({ current: i + 1, total: pendingBatchIds.length })
+      try {
+        await fetch('/api/pricing/trigger', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Worker-Token': import.meta.env.VITE_WORKER_SECRET,
+          },
+          body: JSON.stringify({ batch_id: pendingBatchIds[i] }),
+        })
+      } catch (e) {
+        console.error(`Failed to price batch ${pendingBatchIds[i]}:`, e)
+      }
+      if (i < pendingBatchIds.length - 1) {
+        await new Promise((r) => setTimeout(r, 500))
+      }
+    }
+    await refresh()
+    setPricing(false)
+    setPricingProgress(null)
   }
 
   async function archiveSelected() {
@@ -101,6 +140,19 @@ export function InventoryView() {
         <span className="text-xs text-muted-foreground ml-auto">
           {filtered.length} item{filtered.length !== 1 ? 's' : ''}
         </span>
+
+        {pendingBatchIds.length > 0 && (
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={pricing}
+            onClick={() => void priceAllPending()}
+          >
+            {pricingProgress
+              ? `Pricing ${pricingProgress.current} of ${pricingProgress.total} batches…`
+              : 'Price All Pending'}
+          </Button>
+        )}
 
         {selectedIds.size > 0 && (
           <Button size="sm" variant="destructive" onClick={() => void archiveSelected()}>
