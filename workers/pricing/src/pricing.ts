@@ -5,6 +5,20 @@ function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
+async function withRateLimitRetry<T>(fn: () => Promise<T>): Promise<T> {
+  try {
+    return await fn()
+  } catch (err) {
+    if (err instanceof Anthropic.RateLimitError) {
+      const retryAfter = err.headers?.get('retry-after')
+      const waitMs = retryAfter ? parseInt(retryAfter, 10) * 1000 : 60_000
+      await sleep(waitMs)
+      return fn()
+    }
+    throw err
+  }
+}
+
 const MODEL = 'claude-sonnet-4-6'
 const MAX_SEARCH_TURNS = 8
 const FLOOR_PRICE = 4.99
@@ -68,14 +82,14 @@ async function callWithWebSearch(
   const messages: Anthropic.MessageParam[] = [{ role: 'user', content: userMessage }]
 
   for (let turn = 0; turn < MAX_SEARCH_TURNS; turn++) {
-    const resp = await client.messages.create({
+    const resp = await withRateLimitRetry(() => client.messages.create({
       model: MODEL,
       max_tokens: 2048,
       system: systemPrompt,
       // web_search_20250305 is a server-side tool — Anthropic executes the search
       tools: [{ type: 'web_search_20250305', name: 'web_search' }] as Parameters<typeof client.messages.create>[0]['tools'],
       messages,
-    })
+    }))
 
     messages.push({ role: 'assistant', content: resp.content })
 
@@ -133,12 +147,12 @@ async function generateListing(
   env: Env
 ): Promise<{ title: string; description_short: string; description_long: string } | null> {
   const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY })
-  const resp = await client.messages.create({
+  const resp = await withRateLimitRetry(() => client.messages.create({
     model: MODEL,
     max_tokens: 2048,
     system: LISTING_SYSTEM,
     messages: [{ role: 'user', content: `Item data: ${JSON.stringify(item)}` }],
-  })
+  }))
 
   const t = resp.content.find(b => b.type === 'text')
   const text = t && t.type === 'text' ? t.text : ''
@@ -272,12 +286,12 @@ export async function generateBundleDescription(
     rationale,
     items: items.map(i => ({ name: i.item_name, brand: i.brand, subcategory: i.subcategory, price: i.list_price_final })),
   }
-  const resp = await client.messages.create({
+  const resp = await withRateLimitRetry(() => client.messages.create({
     model: MODEL,
     max_tokens: 2048,
     system: BUNDLE_SYSTEM,
     messages: [{ role: 'user', content: `Bundle data: ${JSON.stringify(payload)}` }],
-  })
+  }))
   const t = resp.content.find(b => b.type === 'text')
   const text = t && t.type === 'text' ? t.text : ''
   const parsed = parseJson(text)

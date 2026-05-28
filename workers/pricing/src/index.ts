@@ -23,13 +23,17 @@ function json(data: unknown, status = 200): Response {
   })
 }
 
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
+
 async function processItems(items: PendingItem[], env: Env): Promise<void> {
-  for (const item of items) {
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i]
     const update = await priceItem(item, env)
     await updateItem(item.item_id, update, env)
     console.log(
       `[${item.item_id}] ${item.item_name} | price: $${update.list_price_final?.toFixed(2) ?? 'null'} | confidence: ${update.price_confidence} | status: ${update.status}`
     )
+    if (i < items.length - 1) await sleep(3000)
   }
 }
 
@@ -232,7 +236,7 @@ export default {
     }
 
     const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown'
-    if (!checkRateLimit(ip, 10)) {
+    if (!checkRateLimit(ip, 120)) {
       return new Response('Too Many Requests', { status: 429 })
     }
 
