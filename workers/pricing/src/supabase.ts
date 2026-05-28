@@ -16,7 +16,7 @@ export async function fetchPendingByBatch(
     .from('items')
     .select('*')
     .eq('batch_id', batch_id)
-    .eq('status', 'PendingReview')
+    .or('status.eq.PendingReview,and(status.eq.ReadyToList,price_confidence.eq.Low)')
   if (error) throw new Error(`fetchPendingByBatch failed: ${error.message}`)
   return (data ?? []) as PendingItem[]
 }

@@ -222,7 +222,7 @@ export default {
   async fetch(
     request: Request,
     env: Env,
-    ctx: ExecutionContext
+    _ctx: ExecutionContext
   ): Promise<Response> {
     const url = new URL(request.url)
 
@@ -261,12 +261,13 @@ export default {
       }
 
       if (items.length === 0) {
-        return json({ status: 'queued', item_count: 0 })
+        return json({ status: 'complete', item_count: 0 })
       }
 
       const batchId = body.batch_id
-      ctx.waitUntil(processItems(items, env).then(() => evaluateBundles(batchId, env)))
-      return json({ status: 'queued', item_count: items.length })
+      await processItems(items, env)
+      await evaluateBundles(batchId, env)
+      return json({ status: 'complete', item_count: items.length })
     }
 
     if (request.method === 'GET' && url.pathname === '/api/pricing/status') {
@@ -275,7 +276,7 @@ export default {
 
       try {
         const items = await fetchItemsByBatch(batchId, env)
-        return json(items)
+        return json({ batch_id: batchId, item_count: items.length, items })
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Unknown error'
         return json({ error: msg }, 500)
