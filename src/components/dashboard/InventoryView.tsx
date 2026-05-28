@@ -31,7 +31,12 @@ export function InventoryView() {
     () => [
       ...new Set(
         items
-          .filter((i) => i.status === 'PendingReview' && i.batch_id)
+          .filter(
+            (i) =>
+              (i.status === 'PendingReview' ||
+                (i.status === 'ReadyToList' && i.price_confidence === 'Low')) &&
+              i.batch_id
+          )
           .map((i) => i.batch_id as string)
       ),
     ],
@@ -150,7 +155,7 @@ export function InventoryView() {
           >
             {pricingProgress
               ? `Pricing ${pricingProgress.current} of ${pricingProgress.total} batches…`
-              : 'Price All Pending'}
+              : 'Price Pending / Low Confidence'}
           </Button>
         )}
 
