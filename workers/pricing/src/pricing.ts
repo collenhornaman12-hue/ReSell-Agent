@@ -91,6 +91,8 @@ async function callWithWebSearch(
       messages,
     }))
 
+    console.log(`[tokens][search] turn=${turn} in=${resp.usage.input_tokens} out=${resp.usage.output_tokens}`)
+
     messages.push({ role: 'assistant', content: resp.content })
 
     if (resp.stop_reason === 'end_turn') {
@@ -106,7 +108,17 @@ async function callWithWebSearch(
           tool_use_id: b.id,
           content: '',
         }))
-      messages.push({ role: 'user', content: toolResults })
+      const truncated = toolResults.map(tr => ({
+        ...tr,
+        content: typeof tr.content === 'string'
+          ? tr.content.slice(0, 8000)
+          : Array.isArray(tr.content)
+            ? tr.content.map(c => c.type === 'text'
+                ? { ...c, text: c.text.slice(0, 8000) }
+                : c)
+            : tr.content,
+      }))
+      messages.push({ role: 'user', content: truncated })
     }
   }
 
@@ -153,6 +165,8 @@ async function generateListing(
     system: LISTING_SYSTEM,
     messages: [{ role: 'user', content: `Item data: ${JSON.stringify(item)}` }],
   }))
+
+  console.log(`[tokens][listing] in=${resp.usage.input_tokens} out=${resp.usage.output_tokens}`)
 
   const t = resp.content.find(b => b.type === 'text')
   const text = t && t.type === 'text' ? t.text : ''
