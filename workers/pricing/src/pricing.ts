@@ -20,7 +20,7 @@ async function withRateLimitRetry<T>(fn: () => Promise<T>): Promise<T> {
 }
 
 const MODEL = 'claude-sonnet-4-6'
-const MAX_SEARCH_TURNS = 8
+const MAX_SEARCH_TURNS = 2
 const FLOOR_PRICE = 4.99
 
 const CONDITION_MULTIPLIERS: Record<string, number> = {
@@ -82,18 +82,50 @@ async function callWithWebSearch(
   const messages: Anthropic.MessageParam[] = [{ role: 'user', content: userMessage }]
 
   for (let turn = 0; turn < MAX_SEARCH_TURNS; turn++) {
+    const trimmedMessages = messages.map((msg: any) => ({
+      ...msg,
+      content: Array.isArray(msg.content)
+        ? msg.content.map((block: any) => {
+            if (block.type === 'web_search_tool_result') {
+              return {
+                ...block,
+                content: Array.isArray(block.content)
+                  ? block.content.map((c: any) =>
+                      c.type === 'text'
+                        ? { ...c, text: c.text.slice(0, 400) }
+                        : c
+                    )
+                  : block.content
+              }
+            }
+            return block
+          })
+        : msg.content
+    }))
+
     const resp = await withRateLimitRetry(() => client.messages.create({
       model: MODEL,
       max_tokens: 2048,
       system: systemPrompt,
       // web_search_20250305 is a server-side tool — Anthropic executes the search
       tools: [{ type: 'web_search_20250305', name: 'web_search' }] as Parameters<typeof client.messages.create>[0]['tools'],
-      messages,
+      messages: trimmedMessages,
     }))
 
     console.log(`[tokens][search] turn=${turn} in=${resp.usage.input_tokens} out=${resp.usage.output_tokens}`)
 
-    messages.push({ role: 'assistant', content: resp.content })
+    const truncatedContent = resp.content.map((block: any) => {
+      if (block.type === 'web_search_tool_result') {
+        const truncatedEncryptedContent = Array.isArray(block.content)
+          ? block.content.map((c: any) =>
+              c.type === 'text' ? { ...c, text: c.text.slice(0, 400) } : c
+            )
+          : block.content
+        return { ...block, content: truncatedEncryptedContent }
+      }
+      return block
+    })
+    messages.push({ role: 'assistant', content: truncatedContent })
 
     if (resp.stop_reason === 'end_turn') {
       const t = resp.content.find(b => b.type === 'text')
@@ -208,19 +240,10 @@ export async function priceItem(item: PendingItem, env: Env): Promise<PricingUpd
       const result = await fetchEbayComps(query, env)
       if (result) {
         comps = result
-        if (comps.comps_count >= 3) break
+        if (comps.comps_count >= 1) break
       }
-    } catch {
-      try {
-        const result = await fetchEbayComps(query, env)
-        if (result) {
-          comps = result
-          if (comps.comps_count >= 3) break
-        }
-      } catch (e) {
-        console.error(`[pricing] Search API failed for "${query}":`, e)
-        return pricingFailureFallback(item, usedQuery)
-      }
+    } catch (e) {
+      console.error(`[pricing] Search API failed for "${query}":`, e)
     }
   }
 
