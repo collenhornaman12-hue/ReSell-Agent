@@ -6,3 +6,4 @@ dist/
 workers/**/.dev.vars
 workers/**/.wrangler/
 .claude/
+*:Zone.Identifier

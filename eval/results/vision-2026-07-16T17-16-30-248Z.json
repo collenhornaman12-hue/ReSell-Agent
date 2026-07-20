@@ -1,0 +1,258 @@
+{
+  "strictAccuracy": 0.16666666666666666,
+  "lenientAccuracy": 0.667,
+  "rows": [
+    {
+      "id": "item-001",
+      "extracted": {
+        "item_name": "McFarlane Toys NFL Pittsburgh Steelers 2-Pack: Mean Joe Greene #75 & James Harrison #92 Action Figures",
+        "brand": "McFarlane Toys",
+        "model_number": "7-48792674558-16",
+        "category": "Sports Memorabilia",
+        "subcategory": "NFL Action Figures",
+        "condition_raw": "Mint",
+        "condition_ebay": "Mint",
+        "condition_notes": null,
+        "is_complete": true,
+        "keywords": [
+          "McFarlane",
+          "NFL",
+          "Pittsburgh Steelers",
+          "Mean Joe Greene",
+          "James Harrison",
+          "action figure",
+          "2-pack",
+          "SportsPicks"
+        ],
+        "identification_confidence": "High"
+      },
+      "expected": {
+        "brand": "McFarlane Toys",
+        "model_number": null,
+        "category": "Sports Memorabilia",
+        "subcategory": null,
+        "condition_raw": "VeryGood",
+        "is_complete": true
+      },
+      "fields": {
+        "category": true,
+        "condition_raw": false,
+        "is_complete": true,
+        "brand": true,
+        "model_number": false
+      },
+      "field_accuracy": 0.6,
+      "all_correct": false
+    },
+    {
+      "id": "item-002",
+      "extracted": {
+        "item_name": "Hess Flatbed Truck with Hot Rods 2022 Toy Truck",
+        "brand": "Hess",
+        "model_number": "2022",
+        "category": "Toys & Hobbies",
+        "subcategory": "Die-Cast & Toy Vehicles",
+        "condition_raw": "Mint",
+        "condition_ebay": "New",
+        "condition_notes": null,
+        "is_complete": true,
+        "keywords": [
+          "Hess truck",
+          "2022 Hess",
+          "flatbed truck",
+          "hot rods",
+          "collectible toy",
+          "pull-back racers",
+          "LED lights",
+          "holiday toy"
+        ],
+        "identification_confidence": "High"
+      },
+      "expected": {
+        "brand": "Hess",
+        "model_number": null,
+        "category": "Toys & Hobbies",
+        "subcategory": null,
+        "condition_raw": "VeryGood",
+        "is_complete": true
+      },
+      "fields": {
+        "category": true,
+        "condition_raw": false,
+        "is_complete": true,
+        "brand": true,
+        "model_number": false
+      },
+      "field_accuracy": 0.6,
+      "all_correct": false
+    },
+    {
+      "id": "item-003",
+      "extracted": {
+        "item_name": "Hess Cargo Plane and Jet Toy",
+        "brand": "Hess",
+        "model_number": "T0806",
+        "category": "Collectibles",
+        "subcategory": "Hess Toy Trucks & Vehicles",
+        "condition_raw": "Mint",
+        "condition_ebay": "New",
+        "condition_notes": null,
+        "is_complete": true,
+        "keywords": [
+          "Hess",
+          "cargo plane",
+          "jet",
+          "collectible",
+          "toy plane",
+          "holiday toy",
+          "Hess truck",
+          "diecast"
+        ],
+        "identification_confidence": "High"
+      },
+      "expected": {
+        "brand": "Hess",
+        "model_number": null,
+        "category": "Toys & Hobbies",
+        "subcategory": null,
+        "condition_raw": "VeryGood",
+        "is_complete": true
+      },
+      "fields": {
+        "category": false,
+        "condition_raw": false,
+        "is_complete": true,
+        "brand": true,
+        "model_number": false
+      },
+      "field_accuracy": 0.4,
+      "all_correct": false
+    },
+    {
+      "id": "item-004",
+      "extracted": {
+        "item_name": "Rocky Commemorative 20th Anniversary Gift Set VHS Box Set (Rocky I-V) MGM/UA",
+        "brand": "MGM/UA Home Video",
+        "model_number": "M605717",
+        "category": "Books & Media",
+        "subcategory": "VHS Box Set",
+        "condition_raw": "VeryGood",
+        "condition_ebay": "Very Good",
+        "condition_notes": "Box shows minor wear and light scuffing on bottom panel; tapes appear intact and complete; no significant damage observed",
+        "is_complete": true,
+        "keywords": [
+          "Rocky",
+          "VHS box set",
+          "MGM",
+          "20th anniversary",
+          "Sylvester Stallone",
+          "commemorative",
+          "Rocky I-V",
+          "collectible VHS"
+        ],
+        "identification_confidence": "High"
+      },
+      "expected": {
+        "brand": "MGM/UA Home Video",
+        "model_number": null,
+        "category": "Entertainment Memorabilia",
+        "subcategory": null,
+        "condition_raw": "VeryGood",
+        "is_complete": true
+      },
+      "fields": {
+        "category": false,
+        "condition_raw": true,
+        "is_complete": true,
+        "brand": true,
+        "model_number": false
+      },
+      "field_accuracy": 0.6,
+      "all_correct": false
+    },
+    {
+      "id": "item-005",
+      "extracted": {
+        "item_name": "Old No. 9 Express Toy Train in a Tin - Item No. 3901",
+        "brand": "Westminster",
+        "model_number": "3901",
+        "category": "Toys & Hobbies",
+        "subcategory": "Model Trains & Sets",
+        "condition_raw": "Mint",
+        "condition_ebay": "New",
+        "condition_notes": null,
+        "is_complete": true,
+        "keywords": [
+          "toy train",
+          "tin toy",
+          "battery powered",
+          "locomotive",
+          "caboose",
+          "Old No 9",
+          "miniature train set",
+          "collectible tin"
+        ],
+        "identification_confidence": "High"
+      },
+      "expected": {
+        "brand": "Westminster Inc (unconfirmed — low confidence)",
+        "model_number": "3901",
+        "category": "Toys & Hobbies",
+        "subcategory": null,
+        "condition_raw": "Mint",
+        "is_complete": true
+      },
+      "fields": {
+        "category": true,
+        "condition_raw": true,
+        "is_complete": true,
+        "brand": true,
+        "model_number": true
+      },
+      "field_accuracy": 1,
+      "all_correct": true
+    },
+    {
+      "id": "item-006",
+      "extracted": {
+        "item_name": "PEZ Twelve Days of Christmas Ornaments Candy & Dispensers Gift Set",
+        "brand": "PEZ",
+        "model_number": null,
+        "category": "Collectibles",
+        "subcategory": "PEZ Dispensers",
+        "condition_raw": "VeryGood",
+        "condition_ebay": "Very Good",
+        "condition_notes": "Minor wear on back of box edges, slight corner damage on back lower left; contents appear intact and undisturbed",
+        "is_complete": true,
+        "keywords": [
+          "PEZ",
+          "Christmas ornaments",
+          "Twelve Days of Christmas",
+          "PEZ dispensers",
+          "holiday gift set",
+          "sugar cookie candy",
+          "collectible PEZ",
+          "Christmas collectible"
+        ],
+        "identification_confidence": "High"
+      },
+      "expected": {
+        "brand": "PEZ Candy Inc",
+        "model_number": null,
+        "category": "Collectibles",
+        "subcategory": null,
+        "condition_raw": "Good",
+        "is_complete": true
+      },
+      "fields": {
+        "category": true,
+        "condition_raw": false,
+        "is_complete": true,
+        "brand": true,
+        "model_number": true
+      },
+      "field_accuracy": 0.8,
+      "all_correct": false
+    }
+  ]
+}

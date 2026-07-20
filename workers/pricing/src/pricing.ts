@@ -51,26 +51,55 @@ function parseJson(text: string): Record<string, unknown> | null {
   }
 }
 
+const STOP_WORDS = new Set([
+  'a', 'an', 'and', 'as', 'at', 'but', 'by', 'for', 'from',
+  'if', 'in', 'into', 'nor', 'of', 'on', 'onto', 'or', 'over',
+  'so', 'that', 'the', 'this', 'to', 'under', 'with', 'yet',
+])
+
 function buildSearchQueries(item: PendingItem): string[] {
   const yearMatch = item.item_name.match(/\b(19|20)\d{2}\b/)
   const year = yearMatch ? yearMatch[0] : null
+  const words = item.item_name
+    .split(/\s+/)
+    .filter(w => w.length > 2 && !STOP_WORDS.has(w.toLowerCase()))
 
   if (item.brand && item.model_number) {
     const base = `${item.brand} ${item.model_number}`
     const withYear = year ? `${base} ${year}` : base
-    const keyword = item.keywords?.[0] ?? item.item_name.split(' ')[0]
-    const fallback = `${item.brand} ${keyword}`
-    return [...new Set([withYear, base, fallback])].slice(0, 3)
+    const nameKeyword = words.slice(0, 3).join(' ')
+    const brandFallback = `${item.brand} ${nameKeyword}`
+    return [...new Set([withYear, base, brandFallback])].slice(0, 3)
   }
 
-  const words = item.item_name.split(/\s+/).filter(w => w.length > 2)
-  const specific = year
-    ? [...new Set([...words, year])].slice(0, 7).join(' ')
-    : words.slice(0, 5).join(' ')
-  const medium = words.slice(0, 5).join(' ')
-  const broad = words.slice(0, 3).join(' ')
+  // Prepend brand's first word when brand is known and not already in the item name
+  const brandFirst = item.brand?.split(' ')[0] ?? null
+  const brandAlreadyInName = brandFirst
+    ? item.item_name.toLowerCase().includes(brandFirst.toLowerCase())
+    : false
+  const coreWords = brandFirst && !brandAlreadyInName
+    ? [brandFirst, ...words]
+    : words
 
-  return [...new Set([specific, medium, broad])].slice(0, 3)
+  // diagnostic: log full untruncated data before any slice
+  const specificLimit = year ? 8 : 7
+  console.log(`[pricing] buildSearchQueries "${item.item_name.slice(0, 50)}":`, JSON.stringify({
+    brand: item.brand,
+    model_number: item.model_number,
+    keywords: item.keywords,
+    words_after_stop_filter: words,
+    core_words: coreWords,
+    specific_limit: specificLimit,
+    included_in_specific: coreWords.slice(0, specificLimit),
+    dropped_from_specific: coreWords.slice(specificLimit),
+  }))
+
+  const specific = year
+    ? [...new Set([...coreWords, year])].slice(0, 8).join(' ')
+    : coreWords.slice(0, 7).join(' ')
+  const medium = coreWords.slice(0, 4).join(' ')
+
+  return [...new Set([specific, medium])].slice(0, 3)
 }
 
 async function callWithWebSearch(
@@ -157,22 +186,183 @@ async function callWithWebSearch(
   return ''
 }
 
+function buildRelevanceTokens(query: string): string[] {
+  // Drop the first token (brand — appears in every result by definition)
+  return query.toLowerCase().split(/\s+/).filter(t => t.length > 1).slice(1)
+}
+
 async function fetchEbayComps(
   query: string,
   env: Env
 ): Promise<EbayComps | null> {
-  const text = await callWithWebSearch(SEARCH_SYSTEM, `Query: ${query}`, env)
-  const parsed = parseJson(text)
-  if (!parsed) return null
+  try {
+    const url = `https://api.apify.com/v2/acts/automation-lab~ebay-sold-scraper/run-sync-get-dataset-items?token=${env.APIFY_API_TOKEN}`
+    const requestBody = JSON.stringify({
+      searchQueries: [query],
+      maxListingsPerSearch: 25,
+      sort: 'newly_listed',
+      condition: [],
+    })
 
-  const comps_count = typeof parsed.comps_count === 'number' ? Math.round(parsed.comps_count) : 0
-  const median_price = typeof parsed.median_price === 'number' ? parsed.median_price : 0
-  const price_range = typeof parsed.price_range === 'string' ? parsed.price_range : '$0-$0'
-  const confidence = (['High', 'Medium', 'Low'] as const).includes(parsed.confidence as 'High' | 'Medium' | 'Low')
-    ? (parsed.confidence as 'High' | 'Medium' | 'Low')
-    : 'Low'
+    const doFetch = async (): Promise<{ ok: boolean; text: string }> => {
+      const r = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: requestBody,
+      })
+      console.log(`[pricing] apify status=${r.status} query="${query}"`)
+      const text = await r.text()
+      console.log(`[pricing] apify raw body: ${text.length <= 500 ? text : text.slice(0, 500) + '…'}`)
+      return { ok: r.ok, text }
+    }
 
-  return { comps_count, median_price, price_range, confidence }
+    let { ok, text: rawText } = await doFetch()
+    if (!ok) return null
+
+    let items = JSON.parse(rawText) as Record<string, unknown>[]
+    if (!Array.isArray(items)) return null
+
+    // Retry once on empty array — actor has transient failures on valid queries
+    if (items.length === 0) {
+      console.log(`[pricing] apify empty result for "${query}" — retrying after 1.5s`)
+      await sleep(1500)
+      const retry = await doFetch()
+      if (!retry.ok) {
+        console.log(`[pricing] apify retry HTTP error for "${query}" — treating as genuine zero`)
+        return null
+      }
+      const retryItems = JSON.parse(retry.text) as Record<string, unknown>[]
+      if (Array.isArray(retryItems) && retryItems.length > 0) {
+        console.log(`[pricing] apify retry recovered ${retryItems.length} results for "${query}"`)
+        items = retryItems
+      } else {
+        console.log(`[pricing] apify retry also empty for "${query}" — genuine zero`)
+        return null
+      }
+    }
+
+    // Title-relevance pre-filter — applied before outlier exclusion
+    const relevanceTokens = buildRelevanceTokens(query)
+    const relevanceThreshold = Math.ceil(relevanceTokens.length / 2)
+    const relevantItems: Record<string, unknown>[] = []
+    const rejectedTitles: string[] = []
+    for (const item of items) {
+      const title = typeof item.title === 'string' ? item.title : ''
+      const lowerTitle = title.toLowerCase()
+      const matchCount = relevanceTokens.filter(t => lowerTitle.includes(t)).length
+      if (relevanceTokens.length === 0 || matchCount >= relevanceThreshold) {
+        relevantItems.push(item)
+      } else {
+        rejectedTitles.push(`"${title.slice(0, 70)}" [${matchCount}/${relevanceTokens.length}]`)
+      }
+    }
+    if (rejectedTitles.length > 0) {
+      console.log(
+        `[pricing] relevance filter: ${items.length} raw → ${relevantItems.length} kept` +
+        ` (tokens [${relevanceTokens.join(', ')}], need ≥${relevanceThreshold})` +
+        ` — rejected: ${rejectedTitles.join(' | ')}`
+      )
+    } else {
+      console.log(
+        `[pricing] relevance filter: ${items.length} raw → ${relevantItems.length} kept` +
+        ` (tokens [${relevanceTokens.join(', ')}], need ≥${relevanceThreshold}, all passed)`
+      )
+    }
+
+    const prices = relevantItems
+      .map((item) => {
+        const p = item.soldPrice
+        return typeof p === 'number' ? p : null
+      })
+      .filter((p): p is number => p !== null && p > 0)
+
+    if (prices.length === 0) return null
+
+    // FIX 1: preliminary sort + median for outlier detection (PRD §5.2C)
+    prices.sort((a, b) => a - b)
+
+    // Bimodal/high-variance detection — runs before outlier exclusion on relevance-filtered prices
+    if (prices.length >= 5) {
+      const mean = prices.reduce((a, b) => a + b, 0) / prices.length
+      const variance = prices.reduce((sum, p) => sum + (p - mean) ** 2, 0) / prices.length
+      const cv = Math.sqrt(variance) / mean
+      if (cv > 0.5) {
+        // Find the largest gap where BOTH resulting clusters would have >= 2 items
+        let maxQualifiedGap = 0
+        let splitIdx = -1
+        for (let i = 0; i < prices.length - 1; i++) {
+          const gap = prices[i + 1] - prices[i]
+          const lowerCount = i + 1
+          const upperCount = prices.length - i - 1
+          if (lowerCount >= 2 && upperCount >= 2 && gap > maxQualifiedGap) {
+            maxQualifiedGap = gap
+            splitIdx = i
+          }
+        }
+        if (splitIdx >= 0) {
+          const lower = prices.slice(0, splitIdx + 1)
+          const upper = prices.slice(splitIdx + 1)
+          const lowerRange = `$${lower[0].toFixed(2)}-$${lower[lower.length - 1].toFixed(2)}`
+          const upperRange = `$${upper[0].toFixed(2)}-$${upper[upper.length - 1].toFixed(2)}`
+          console.log(
+            `[pricing] bimodal detected for "${query}": CV=${cv.toFixed(2)}` +
+            ` — lower (n=${lower.length}) ${lowerRange}, upper (n=${upper.length}) ${upperRange}` +
+            ` — flagging for human review`
+          )
+          return {
+            comps_count: prices.length,
+            median_price: 0,
+            price_range: `${lowerRange} / ${upperRange} (bimodal — review)`,
+            confidence: 'Low',
+            note: 'comps split into two price clusters — possible product mismatch, human review required',
+          }
+        }
+        console.log(
+          `[pricing] high variance for "${query}" (CV=${cv.toFixed(2)}) but no qualified two-cluster split` +
+          ` — continuing to outlier exclusion`
+        )
+      }
+    }
+
+    const rawMid = Math.floor(prices.length / 2)
+    const prelimMedian =
+      prices.length % 2 === 0
+        ? (prices[rawMid - 1] + prices[rawMid]) / 2
+        : prices[rawMid]
+
+    const filtered = prices.filter(p => p <= prelimMedian * 3 && p >= prelimMedian / 3)
+    const excludedCount = prices.length - filtered.length
+    if (excludedCount > 0) {
+      console.log(
+        `[pricing] outlier exclusion: removed ${excludedCount}/${prices.length} prices` +
+        ` (prelim median $${prelimMedian.toFixed(2)};` +
+        ` excluded: ${prices.filter(p => p > prelimMedian * 3 || p < prelimMedian / 3).map(p => '$' + p.toFixed(2)).join(', ')})`
+      )
+    }
+
+    if (filtered.length === 0) return null
+
+    const mid = Math.floor(filtered.length / 2)
+    const median_price =
+      filtered.length % 2 === 0
+        ? (filtered[mid - 1] + filtered[mid]) / 2
+        : filtered[mid]
+
+    const comps_count = filtered.length
+    const min = filtered[0]
+    const max = filtered[filtered.length - 1]
+    const baseRange = `$${min.toFixed(2)}-$${max.toFixed(2)}`
+    const price_range =
+      excludedCount > 0
+        ? `${baseRange} (${excludedCount} outlier${excludedCount > 1 ? 's' : ''} excluded)`
+        : baseRange
+    const confidence: 'High' | 'Medium' | 'Low' = comps_count >= 3 ? 'High' : 'Medium'
+
+    return { comps_count, median_price, price_range, confidence }
+  } catch (err) {
+    console.log(`[pricing] apify fetch exception for "${query}":`, err)
+    return null
+  }
 }
 
 // Round price to nearest .99 — uses 0.30 as midpoint threshold
@@ -236,6 +426,7 @@ export async function priceItem(item: PendingItem, env: Env): Promise<PricingUpd
 
   for (const query of queries) {
     usedQuery = query
+    console.log(`[pricing] searchQuery: "${query}"`)
     try {
       const result = await fetchEbayComps(query, env)
       if (result) {
@@ -248,6 +439,21 @@ export async function priceItem(item: PendingItem, env: Env): Promise<PricingUpd
   }
 
   if (!comps || comps.median_price <= 0) {
+    if (comps?.note) {
+      return {
+        ebay_search_query: usedQuery,
+        ebay_comps_count: comps.comps_count,
+        ebay_comp_price_median: null,
+        ebay_comp_price_range: comps.price_range,
+        ebay_price: null,
+        list_price_final: null,
+        price_confidence: 'Low',
+        price_override_reason: comps.note,
+        description_short: `${item.item_name} — ${comps.note}`,
+        description_long: null,
+        status: 'ReadyToList',
+      }
+    }
     return pricingFailureFallback(item, usedQuery)
   }
 

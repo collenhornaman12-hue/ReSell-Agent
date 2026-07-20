@@ -1,0 +1,175 @@
+{
+  "meanErrorPct": null,
+  "within15Count": 0,
+  "totalMisses": 6,
+  "rows": [
+    {
+      "id": "item-001",
+      "priced": {
+        "ebay_search_query": "NFL 2PK20 Joe",
+        "ebay_comps_count": 0,
+        "ebay_comp_price_median": null,
+        "ebay_comp_price_range": null,
+        "ebay_price": null,
+        "list_price_final": null,
+        "price_confidence": "Low",
+        "price_override_reason": null,
+        "description_short": "NFL 2PK20 Joe Greene / James Harrison (pricing failed — review)",
+        "description_long": null,
+        "status": "ReadyToList"
+      },
+      "expected_comps": {
+        "median_price": 0,
+        "comps_count": 0,
+        "checked_manually_on_ebay": false,
+        "date_checked": null,
+        "notes": ""
+      },
+      "price_error_pct": null,
+      "within_15_pct": false,
+      "comps_count_predicted": 0,
+      "comps_count_actual": 0,
+      "total_miss": true
+    },
+    {
+      "id": "item-002",
+      "priced": {
+        "ebay_search_query": "Flatbed Truck with",
+        "ebay_comps_count": 0,
+        "ebay_comp_price_median": null,
+        "ebay_comp_price_range": null,
+        "ebay_price": null,
+        "list_price_final": null,
+        "price_confidence": "Low",
+        "price_override_reason": null,
+        "description_short": "Flatbed Truck with Hot Rods 2022 (pricing failed — review)",
+        "description_long": null,
+        "status": "ReadyToList"
+      },
+      "expected_comps": {
+        "median_price": 0,
+        "comps_count": 0,
+        "checked_manually_on_ebay": false,
+        "date_checked": null,
+        "notes": ""
+      },
+      "price_error_pct": null,
+      "within_15_pct": false,
+      "comps_count_predicted": 0,
+      "comps_count_actual": 0,
+      "total_miss": true
+    },
+    {
+      "id": "item-003",
+      "priced": {
+        "ebay_search_query": "Cargo Plane and",
+        "ebay_comps_count": 0,
+        "ebay_comp_price_median": null,
+        "ebay_comp_price_range": null,
+        "ebay_price": null,
+        "list_price_final": null,
+        "price_confidence": "Low",
+        "price_override_reason": null,
+        "description_short": "Cargo Plane and Jet (pricing failed — review)",
+        "description_long": null,
+        "status": "ReadyToList"
+      },
+      "expected_comps": {
+        "median_price": 0,
+        "comps_count": 0,
+        "checked_manually_on_ebay": false,
+        "date_checked": null,
+        "notes": ""
+      },
+      "price_error_pct": null,
+      "within_15_pct": false,
+      "comps_count_predicted": 0,
+      "comps_count_actual": 0,
+      "total_miss": true
+    },
+    {
+      "id": "item-004",
+      "priced": {
+        "ebay_search_query": "Rocky Commemorative 20th",
+        "ebay_comps_count": 8,
+        "ebay_comp_price_median": 20,
+        "ebay_comp_price_range": "$10-$30",
+        "ebay_price": 21.99,
+        "list_price_final": 21.99,
+        "price_confidence": "Medium",
+        "price_override_reason": null,
+        "description_short": "Very Good condition Rocky 20th Anniversary VHS Gift Set. Complete set included. Ships USPS flat rate.",
+        "description_long": "<p><strong>Item Identification</strong><br>This is the MGM/UA Home Video Rocky Commemorative 20th Anniversary VHS Gift Set. Released to celebrate the 20th anniversary of the iconic Rocky franchise, this collectible gift set was produced by MGM/UA Home Video and represents a significant release in the history of the series on home video format.</p><p><strong>Condition</strong><br>This set is rated Very Good. The tapes and packaging show only light signs of handling consistent with normal use and storage. There are no major scuffs, cracks, or damage to the cases. Labels are intact and legible. The overall presentation remains solid for a set of this age and format.</p><p><strong>Completeness</strong><br>This gift set is complete. All components included in the original release are present. Nothing is missing from the set as originally packaged by MGM/UA Home Video.</p><p><strong>Shipping</strong><br>This item ships via USPS flat rate service. Your order will be carefully packed to ensure safe arrival. Tracking information will be provided at the time of shipment. Please allow standard processing time before shipment.</p><p><strong>Returns</strong><br>Returns are accepted within 30 days of delivery. Item must be returned in the same condition as received. Please reach out before opening a case so we can work toward a resolution quickly and fairly.</p><p><strong>Questions</strong><br>If you have any questions about this item, condition details, or shipping, please send a message through eBay before purchasing. We are happy to provide additional photos or clarification to help you make a confident buying decision.</p>",
+        "status": "ReadyToList"
+      },
+      "expected_comps": {
+        "median_price": 0,
+        "comps_count": 0,
+        "checked_manually_on_ebay": false,
+        "date_checked": null,
+        "notes": ""
+      },
+      "price_error_pct": null,
+      "within_15_pct": false,
+      "comps_count_predicted": 8,
+      "comps_count_actual": 0,
+      "total_miss": true
+    },
+    {
+      "id": "item-005",
+      "priced": {
+        "ebay_search_query": "Westminster Inc (unconfirmed — low confidence) Toy",
+        "ebay_comps_count": 8,
+        "ebay_comp_price_median": 12.99,
+        "ebay_comp_price_range": "$5-$25",
+        "ebay_price": 15.99,
+        "list_price_final": 15.99,
+        "price_confidence": "Low",
+        "price_override_reason": null,
+        "description_short": "Mint condition Toy Train in a Tin — Old No. 9 Express, Model 3901. Complete set included. Ships USPS flat rate.",
+        "description_long": "<p><strong>Item Identification:</strong> This listing is for the Westminster Inc. (unconfirmed) \"Old No. 9 Express\" Toy Train in a Tin, Model Number 3901. This is a classic tin toy train set featuring the charming Old No. 9 Express design. Please note that the brand attribution to Westminster Inc. is low confidence — buyers are encouraged to review all provided photos for packaging and branding details prior to purchasing.</p><p><strong>Condition:</strong> This item is in Mint condition. It shows no signs of wear, damage, or deterioration. The tin and all components appear pristine and well-preserved. No condition notes or exceptions apply.</p><p><strong>Completeness:</strong> This set is complete. All original components are present and accounted for as the item was received. Nothing is missing, broken, or substituted.</p><p><strong>Shipping:</strong> This item ships via USPS Flat Rate service. It will be carefully packaged to ensure it arrives safely and in the same condition as described. Tracking information will be provided upon shipment.</p><p><strong>Returns:</strong> Returns are accepted if the item is not as described in this listing. Please open a case within the standard eBay return window and we will work with you to reach a fair resolution. Items must be returned in the same condition as shipped.</p><p><strong>Questions:</strong> If you have any questions about this item, its condition, or the included components, please don't hesitate to reach out via eBay messaging before purchasing. Additional photos can be provided upon request. We aim to respond promptly and accurately to all inquiries.</p>",
+        "status": "ReadyToList"
+      },
+      "expected_comps": {
+        "median_price": 0,
+        "comps_count": 0,
+        "checked_manually_on_ebay": false,
+        "date_checked": null,
+        "notes": ""
+      },
+      "price_error_pct": null,
+      "within_15_pct": false,
+      "comps_count_predicted": 8,
+      "comps_count_actual": 0,
+      "total_miss": true
+    },
+    {
+      "id": "item-006",
+      "priced": {
+        "ebay_search_query": "PEZ Twelve Days Christmas Ornaments",
+        "ebay_comps_count": 6,
+        "ebay_comp_price_median": 27.99,
+        "ebay_comp_price_range": "$18-$45",
+        "ebay_price": 25.99,
+        "list_price_final": 25.99,
+        "price_confidence": "Low",
+        "price_override_reason": null,
+        "description_short": "Good condition PEZ Twelve Days of Christmas Ornament set. Complete set included. Ships USPS flat rate.",
+        "description_long": "<p><strong>Item Identification</strong><br>This listing is for a PEZ Candy Inc Twelve Days of Christmas Ornaments set. This is an officially licensed PEZ collectible holiday ornament collection, a fun and festive item for PEZ enthusiasts and holiday collectors alike.</p><p><strong>Condition</strong><br>This set is in Good condition. The pieces show normal signs of handling and age consistent with a Good grade. Please review all provided photos carefully as they are considered part of the item description.</p><p><strong>Completeness</strong><br>This set is complete. All twelve ornaments from the Twelve Days of Christmas collection are included. Nothing is missing from the original set.</p><p><strong>Shipping</strong><br>Item ships via USPS flat rate priority mail. Your purchase will be carefully packaged to ensure safe arrival. Tracking information will be provided at the time of shipment.</p><p><strong>Returns</strong><br>Returns are accepted within 30 days of delivery. Item must be returned in the same condition as received. Buyer is responsible for return shipping costs unless the item was not as described.</p><p><strong>Questions</strong><br>Have a question before purchasing? Please use the eBay messaging system and we will respond as quickly as possible. Additional photos can be provided upon request. We want you to feel confident in your purchase before committing to buy.</p>",
+        "status": "ReadyToList"
+      },
+      "expected_comps": {
+        "median_price": 0,
+        "comps_count": 0,
+        "checked_manually_on_ebay": false,
+        "date_checked": null,
+        "notes": ""
+      },
+      "price_error_pct": null,
+      "within_15_pct": false,
+      "comps_count_predicted": 6,
+      "comps_count_actual": 0,
+      "total_miss": true
+    }
+  ]
+}

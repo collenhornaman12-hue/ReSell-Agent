@@ -1,0 +1,258 @@
+{
+  "strictAccuracy": 0,
+  "lenientAccuracy": 0.733,
+  "rows": [
+    {
+      "id": "item-001",
+      "extracted": {
+        "item_name": "McFarlane Toys NFL Pittsburgh Steelers 2-Pack Action Figures: Mean Joe Greene #75 & James Harrison #92",
+        "brand": "McFarlane Toys",
+        "model_number": "7879267455816",
+        "category": "Sports Memorabilia",
+        "subcategory": "NFL Action Figures",
+        "condition_raw": "VeryGood",
+        "condition_ebay": "Near Mint",
+        "condition_notes": "Box appears intact with no major crushing or tears visible. Figures are sealed inside the original blister packaging. Minor shelf wear observable on box edges and corners. No significant damage to the window display area.",
+        "is_complete": true,
+        "keywords": [
+          "McFarlane",
+          "Pittsburgh Steelers",
+          "Mean Joe Greene",
+          "James Harrison",
+          "NFL action figure",
+          "2-pack",
+          "SportsPicks",
+          "collectible"
+        ],
+        "identification_confidence": "High"
+      },
+      "expected": {
+        "brand": "McFarlane Toys",
+        "model_number": null,
+        "category": "Sports Memorabilia",
+        "subcategory": null,
+        "condition_raw": "VeryGood",
+        "is_complete": true
+      },
+      "fields": {
+        "category": true,
+        "condition_raw": true,
+        "is_complete": true,
+        "brand": true,
+        "model_number": false
+      },
+      "field_accuracy": 0.8,
+      "all_correct": false
+    },
+    {
+      "id": "item-002",
+      "extracted": {
+        "item_name": "Hess Flatbed Truck with Hot Rods 2022 Toy Truck",
+        "brand": "Hess",
+        "model_number": null,
+        "category": "Toys & Hobbies",
+        "subcategory": "Diecast & Toy Vehicles",
+        "condition_raw": "Mint",
+        "condition_ebay": "New",
+        "condition_notes": "Box appears factory sealed with no visible damage, crushing, or wear on any surface. Corners are sharp and intact, green box finish shows no scuffs or fading, consistent with an unopened unit.",
+        "is_complete": true,
+        "keywords": [
+          "Hess truck",
+          "Hess flatbed",
+          "hot rods",
+          "2022 Hess",
+          "collectible toy truck",
+          "Hess toy",
+          "pull-back racer",
+          "holiday truck"
+        ],
+        "identification_confidence": "High"
+      },
+      "expected": {
+        "brand": "Hess",
+        "model_number": null,
+        "category": "Toys & Hobbies",
+        "subcategory": null,
+        "condition_raw": "VeryGood",
+        "is_complete": true
+      },
+      "fields": {
+        "category": true,
+        "condition_raw": false,
+        "is_complete": true,
+        "brand": true,
+        "model_number": true
+      },
+      "field_accuracy": 0.8,
+      "all_correct": false
+    },
+    {
+      "id": "item-003",
+      "extracted": {
+        "item_name": "Hess Cargo Plane and Jet Toy Truck",
+        "brand": "Hess",
+        "model_number": "T0806",
+        "category": "Toys & Hobbies",
+        "subcategory": "Hess Toy Trucks / Collectible Toy Vehicles",
+        "condition_raw": "VeryGood",
+        "condition_ebay": "Very Good",
+        "condition_notes": "Box appears intact with no crushing or tearing visible; corners show minor shelf wear but no significant damage; box graphics are bright and clear with no fading; item appears unplayed with but box is not factory sealed",
+        "is_complete": true,
+        "keywords": [
+          "Hess",
+          "cargo plane",
+          "jet",
+          "toy truck",
+          "collectible",
+          "Hess toy",
+          "die cast",
+          "airplane"
+        ],
+        "identification_confidence": "High"
+      },
+      "expected": {
+        "brand": "Hess",
+        "model_number": null,
+        "category": "Toys & Hobbies",
+        "subcategory": null,
+        "condition_raw": "VeryGood",
+        "is_complete": true
+      },
+      "fields": {
+        "category": true,
+        "condition_raw": true,
+        "is_complete": true,
+        "brand": true,
+        "model_number": false
+      },
+      "field_accuracy": 0.8,
+      "all_correct": false
+    },
+    {
+      "id": "item-004",
+      "extracted": {
+        "item_name": "Rocky Commemorative 20th Anniversary Gift Set VHS 5-Film Collection (Rocky I-V)",
+        "brand": "MGM/UA Home Video",
+        "model_number": "M605717",
+        "category": "Books & Media",
+        "subcategory": "VHS Box Set",
+        "condition_raw": "Good",
+        "condition_ebay": "Good",
+        "condition_notes": null,
+        "is_complete": true,
+        "keywords": [
+          "Rocky VHS box set",
+          "Rocky 20th anniversary",
+          "MGM UA",
+          "VHS collection",
+          "Sylvester Stallone",
+          "Rocky I-V",
+          "commemorative gift set",
+          "1995 VHS"
+        ],
+        "identification_confidence": "High"
+      },
+      "expected": {
+        "brand": "MGM/UA Home Video",
+        "model_number": null,
+        "category": "Entertainment Memorabilia",
+        "subcategory": null,
+        "condition_raw": "VeryGood",
+        "is_complete": true
+      },
+      "fields": {
+        "category": false,
+        "condition_raw": false,
+        "is_complete": true,
+        "brand": true,
+        "model_number": false
+      },
+      "field_accuracy": 0.4,
+      "all_correct": false
+    },
+    {
+      "id": "item-005",
+      "extracted": {
+        "item_name": "Old No. 9 Express Toy Train in a Tin Set - Item 3901",
+        "brand": "Westminster",
+        "model_number": "3901",
+        "category": "Toys & Hobbies",
+        "subcategory": "Toy Train Sets",
+        "condition_raw": "VeryGood",
+        "condition_ebay": "Very Good",
+        "condition_notes": "Tin shows no visible dents or scratches on exterior surfaces; contents appear to be in original plastic bag packaging inside the tin, suggesting minimal to no use; all visible components intact and undamaged.",
+        "is_complete": true,
+        "keywords": [
+          "toy train set",
+          "tin toy train",
+          "Old No 9 Express",
+          "battery powered train",
+          "Westminster",
+          "miniature train",
+          "locomotive set",
+          "collectible train"
+        ],
+        "identification_confidence": "High"
+      },
+      "expected": {
+        "brand": "Westminster Inc (unconfirmed — low confidence)",
+        "model_number": "3901",
+        "category": "Toys & Hobbies",
+        "subcategory": null,
+        "condition_raw": "Mint",
+        "is_complete": true
+      },
+      "fields": {
+        "category": true,
+        "condition_raw": false,
+        "is_complete": true,
+        "brand": true,
+        "model_number": true
+      },
+      "field_accuracy": 0.8,
+      "all_correct": false
+    },
+    {
+      "id": "item-006",
+      "extracted": {
+        "item_name": "PEZ Twelve Days of Christmas Ornaments Candy & Dispensers Gift Set",
+        "brand": "PEZ",
+        "model_number": null,
+        "category": "Collectibles",
+        "subcategory": "PEZ Dispensers",
+        "condition_raw": "VeryGood",
+        "condition_ebay": "Very Good",
+        "condition_notes": "Box shows minor wear on back corners and slight scuffing on rear panel; front window and contents appear intact with no missing dispensers visible; gold bow decoration present and intact; no crushing or major damage observed",
+        "is_complete": true,
+        "keywords": [
+          "PEZ",
+          "Twelve Days of Christmas",
+          "ornaments",
+          "dispensers",
+          "holiday",
+          "gift set",
+          "sugar cookie candy",
+          "collectible"
+        ],
+        "identification_confidence": "High"
+      },
+      "expected": {
+        "brand": "PEZ Candy Inc",
+        "model_number": null,
+        "category": "Collectibles",
+        "subcategory": null,
+        "condition_raw": "Good",
+        "is_complete": true
+      },
+      "fields": {
+        "category": true,
+        "condition_raw": false,
+        "is_complete": true,
+        "brand": true,
+        "model_number": true
+      },
+      "field_accuracy": 0.8,
+      "all_correct": false
+    }
+  ]
+}

@@ -1,0 +1,147 @@
+[
+  {
+    "id": "item-001",
+    "item_name_seed": "NFL Steelers Joe Greene James Harrison 2-Pack",
+    "photo_urls": [
+      "https://res.cloudinary.com/dbqu7xgib/image/upload/v1784220945/resell-agent/resell-agent/99163e69-b5c0-4d70-974b-aaa601369c4e/Item%201/0.jpg",
+      "https://res.cloudinary.com/dbqu7xgib/image/upload/v1784220947/resell-agent/resell-agent/99163e69-b5c0-4d70-974b-aaa601369c4e/Item%201/1.jpg",
+      "https://res.cloudinary.com/dbqu7xgib/image/upload/v1784220950/resell-agent/resell-agent/99163e69-b5c0-4d70-974b-aaa601369c4e/Item%201/2.jpg",
+      "https://res.cloudinary.com/dbqu7xgib/image/upload/v1784220953/resell-agent/resell-agent/99163e69-b5c0-4d70-974b-aaa601369c4e/Item%201/3.jpg"
+    ],
+    "expected": {
+      "brand": "McFarlane Toys",
+      "model_number": null,
+      "category": "Sports Memorabilia",
+      "subcategory": null,
+      "condition_raw": "VeryGood",
+      "is_complete": true
+    },
+    "expected_comps": {
+      "median_price": 56.05,
+      "comps_count": 4,
+      "checked_manually_on_ebay": true,
+      "date_checked": "2026-07-18",
+      "notes": ""
+    }
+  },
+  {
+    "id": "item-002",
+    "item_name_seed": "Flatbed Truck with Hot Rods 2022",
+    "photo_urls": [
+      "https://res.cloudinary.com/dbqu7xgib/image/upload/v1784220956/resell-agent/resell-agent/d99ea014-ebf1-4ee4-be1f-7b4e9b1a17d2/Item%202/0.jpg",
+      "https://res.cloudinary.com/dbqu7xgib/image/upload/v1784220958/resell-agent/resell-agent/d99ea014-ebf1-4ee4-be1f-7b4e9b1a17d2/Item%202/1.jpg",
+      "https://res.cloudinary.com/dbqu7xgib/image/upload/v1784220961/resell-agent/resell-agent/d99ea014-ebf1-4ee4-be1f-7b4e9b1a17d2/Item%202/2.jpg"
+    ],
+    "expected": {
+      "brand": "Hess",
+      "model_number": null,
+      "category": "Toys & Hobbies",
+      "subcategory": null,
+      "condition_raw": "VeryGood",
+      "is_complete": true
+    },
+    "expected_comps": {
+      "median_price": 30.00,
+      "comps_count": 13,
+      "checked_manually_on_ebay": true,
+      "date_checked": "2026-07-18",
+      "notes": ""
+    }
+  },
+  {
+    "id": "item-003",
+    "item_name_seed": "Cargo Plane and Jet",
+    "photo_urls": [
+      "https://res.cloudinary.com/dbqu7xgib/image/upload/v1784220963/resell-agent/resell-agent/97846112-0e0a-46fd-934b-d88869f09076/Item%203/0.jpg",
+      "https://res.cloudinary.com/dbqu7xgib/image/upload/v1784220965/resell-agent/resell-agent/97846112-0e0a-46fd-934b-d88869f09076/Item%203/1.jpg",
+      "https://res.cloudinary.com/dbqu7xgib/image/upload/v1784220968/resell-agent/resell-agent/97846112-0e0a-46fd-934b-d88869f09076/Item%203/2.jpg"
+    ],
+    "expected": {
+      "brand": "Hess",
+      "model_number": null,
+      "category": "Toys & Hobbies",
+      "subcategory": null,
+      "condition_raw": "VeryGood",
+      "is_complete": true
+    },
+    "expected_comps": {
+      "median_price": 34.99,
+      "comps_count": 25,
+      "checked_manually_on_ebay": true,
+      "date_checked": "2026-07-18",
+      "notes": ""
+    }
+  },
+  {
+    "id": "item-004",
+    "item_name_seed": "Rocky Commemorative 20th Anniversary VHS Gift Set",
+    "photo_urls": [
+      "https://res.cloudinary.com/dbqu7xgib/image/upload/v1784220971/resell-agent/resell-agent/e75c2b5c-74cd-4254-bd63-9d8eaf94e06c/Item%204/0.jpg",
+      "https://res.cloudinary.com/dbqu7xgib/image/upload/v1784220973/resell-agent/resell-agent/e75c2b5c-74cd-4254-bd63-9d8eaf94e06c/Item%204/1.jpg",
+      "https://res.cloudinary.com/dbqu7xgib/image/upload/v1784220976/resell-agent/resell-agent/e75c2b5c-74cd-4254-bd63-9d8eaf94e06c/Item%204/2.jpg",
+      "https://res.cloudinary.com/dbqu7xgib/image/upload/v1784220978/resell-agent/resell-agent/e75c2b5c-74cd-4254-bd63-9d8eaf94e06c/Item%204/3.jpg"
+    ],
+    "expected": {
+      "brand": "MGM/UA Home Video",
+      "model_number": null,
+      "category": "Entertainment Memorabilia",
+      "subcategory": null,
+      "condition_raw": "VeryGood",
+      "is_complete": true
+    },
+    "expected_comps": {
+      "median_price": 15.38,
+      "comps_count": 12,
+      "checked_manually_on_ebay": true,
+      "date_checked": "2026-07-18",
+      "notes": ""
+    }
+  },
+  {
+    "id": "item-005",
+    "item_name_seed": "Toy Train in a Tin — Old No. 9 Express",
+    "photo_urls": [
+      "https://res.cloudinary.com/dbqu7xgib/image/upload/v1784220980/resell-agent/resell-agent/325fa035-efca-4293-8358-6d007b208f11/Item%205/0.jpg",
+      "https://res.cloudinary.com/dbqu7xgib/image/upload/v1784220982/resell-agent/resell-agent/325fa035-efca-4293-8358-6d007b208f11/Item%205/1.jpg",
+      "https://res.cloudinary.com/dbqu7xgib/image/upload/v1784220984/resell-agent/resell-agent/325fa035-efca-4293-8358-6d007b208f11/Item%205/2.jpg"
+    ],
+    "expected": {
+      "brand": "Westminster",
+      "model_number": "3901",
+      "category": "Toys & Hobbies",
+      "subcategory": null,
+      "condition_raw": "Mint",
+      "is_complete": true
+    },
+    "expected_comps": {
+      "median_price": 14.99,
+      "comps_count": 7,
+      "checked_manually_on_ebay": true,
+      "date_checked": "2026-07-18",
+      "notes": ""
+    }
+  },
+  {
+    "id": "item-006",
+    "item_name_seed": "PEZ Twelve Days of Christmas Ornaments",
+    "photo_urls": [
+      "https://res.cloudinary.com/dbqu7xgib/image/upload/v1784220986/resell-agent/resell-agent/58d8f2ed-9194-4efa-be3c-bb86fcd5027d/item%206/0.jpg",
+      "https://res.cloudinary.com/dbqu7xgib/image/upload/v1784220989/resell-agent/resell-agent/58d8f2ed-9194-4efa-be3c-bb86fcd5027d/item%206/1.jpg"
+    ],
+    "expected": {
+      "brand": "PEZ Candy Inc",
+      "model_number": null,
+      "category": "Collectibles",
+      "subcategory": null,
+      "condition_raw": "Good",
+      "is_complete": true
+    },
+    "expected_comps": {
+      "median_price": 8.50,
+      "comps_count": 3,
+      "checked_manually_on_ebay": true,
+      "date_checked": "2026-07-18",
+      "notes": ""
+    }
+  }
+]

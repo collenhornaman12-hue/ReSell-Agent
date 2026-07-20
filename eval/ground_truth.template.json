@@ -1,0 +1,44 @@
+[
+  {
+    "id": "item-001",
+    "item_name_seed": "Star Wars action figure lot",
+    "photo_urls": [
+      "https://res.cloudinary.com/YOUR_CLOUD/image/upload/resell-agent/example/item-001/0.jpg"
+    ],
+    "expected": {
+      "brand": "Kenner",
+      "model_number": null,
+      "category": "Toys & Hobbies",
+      "subcategory": "Action Figures",
+      "condition_raw": "Good",
+      "is_complete": true
+    },
+    "expected_comps": {
+      "median_price": 24.99,
+      "comps_count": 8,
+      "checked_manually_on_ebay": true,
+      "date_checked": "2026-07-16",
+      "notes": "Searched 'Kenner Star Wars figure lot', LH_Sold=1&LH_Complete=1, last 90 days"
+    }
+  },
+  {
+    "id": "item-002",
+    "item_name_seed": "REPLACE_ME",
+    "photo_urls": ["REPLACE_ME"],
+    "expected": {
+      "brand": null,
+      "model_number": null,
+      "category": "REPLACE_ME — must be exactly one of: Toys & Hobbies, Sports Memorabilia, Collectibles, Entertainment Memorabilia, Books & Media, Other",
+      "subcategory": null,
+      "condition_raw": "REPLACE_ME — must be exactly one of: Mint, VeryGood, Good, Fair, Poor",
+      "is_complete": true
+    },
+    "expected_comps": {
+      "median_price": 0,
+      "comps_count": 0,
+      "checked_manually_on_ebay": false,
+      "date_checked": null,
+      "notes": ""
+    }
+  }
+]

@@ -1,5 +1,6 @@
 export interface Env {
   ANTHROPIC_API_KEY: string
+  APIFY_API_TOKEN: string
   SUPABASE_URL: string
   SUPABASE_SERVICE_ROLE_KEY: string
   WORKER_SECRET: string
@@ -28,6 +29,7 @@ export interface EbayComps {
   median_price: number
   price_range: string
   confidence: 'High' | 'Medium' | 'Low'
+  note?: string
 }
 
 export interface PricingUpdate {

@@ -1,0 +1,175 @@
+{
+  "meanErrorPct": 10.54,
+  "within15Count": 3,
+  "totalMisses": 1,
+  "rows": [
+    {
+      "id": "item-001",
+      "priced": {
+        "ebay_search_query": "McFarlane NFL 2PK20 Joe Greene James Harrison",
+        "ebay_comps_count": 3,
+        "ebay_comp_price_median": 49.99,
+        "ebay_comp_price_range": "$46.69-$64.18",
+        "ebay_price": 54.99,
+        "list_price_final": 54.99,
+        "price_confidence": "High",
+        "price_override_reason": null,
+        "description_short": "Very Good condition McFarlane Toys NFL 2-pack featuring Joe Greene and James Harrison. Complete set. Ships USPS flat rate.",
+        "description_long": "<p><strong>Item Identification</strong><br>This listing is for the McFarlane Toys NFL 2-Pack #20 (2PK20) featuring two Pittsburgh Steelers legends: Joe Greene and James Harrison. This is an officially licensed NFL collectible figure set produced by McFarlane Toys, one of the most recognized names in sports action figures.</p><p><strong>Condition</strong><br>This set is in Very Good condition. The figures and any packaging show light signs of handling or shelf wear consistent with a previously owned collectible. There are no major breaks, missing paint, or structural damage to the figures themselves.</p><p><strong>Completeness</strong><br>This is a complete set. Both figures — Joe Greene and James Harrison — are included. All original accessories and components that came with the 2-pack are present.</p><p><strong>Shipping</strong><br>This item ships via USPS flat rate priority mail. Your order will be carefully packed to ensure it arrives safely. Tracking information will be provided upon shipment.</p><p><strong>Returns</strong><br>Returns are accepted within 30 days of delivery. Item must be returned in the same condition as shipped. Please reach out before opening a return case — we are happy to work with you to resolve any concerns.</p><p><strong>Questions</strong><br>Have a question about this item? Please send a message through eBay prior to purchasing and we will respond promptly. Additional photos can be provided upon request.</p>",
+        "status": "ReadyToList"
+      },
+      "expected_comps": {
+        "median_price": 56.05,
+        "comps_count": 4,
+        "checked_manually_on_ebay": true,
+        "date_checked": "2026-07-18",
+        "notes": ""
+      },
+      "price_error_pct": 10.8,
+      "within_15_pct": true,
+      "comps_count_predicted": 3,
+      "comps_count_actual": 4,
+      "total_miss": false
+    },
+    {
+      "id": "item-002",
+      "priced": {
+        "ebay_search_query": "Hess Flatbed Truck Hot Rods 2022",
+        "ebay_comps_count": 25,
+        "ebay_comp_price_median": 29.99,
+        "ebay_comp_price_range": "$12.00-$69.99",
+        "ebay_price": 32.99,
+        "list_price_final": 32.99,
+        "price_confidence": "High",
+        "price_override_reason": null,
+        "description_short": "Very Good condition Hess 2022 Flatbed Truck with Hot Rods. Complete set with all pieces included. Ships USPS flat rate.",
+        "description_long": "<p><strong>Item Identification</strong><br>This is the official 2022 Hess Toy Truck — Flatbed Truck with Hot Rods. This is an authentic Hess collectible truck, part of their long-running annual holiday toy truck series. The set includes the flatbed truck and accompanying hot rod vehicles.</p><p><strong>Condition</strong><br>This item is in Very Good condition. It shows light signs of handling or display but remains in strong overall shape with no major damage, breaks, or missing paint. Lights and any electronic features are expected to function as intended for this model year.</p><p><strong>Completeness</strong><br>This listing is for a complete set. All originally included components are present — the flatbed truck and the hot rods that accompany it. No pieces are missing.</p><p><strong>Shipping</strong><br>Item ships via USPS flat rate. Orders are carefully packaged to ensure safe arrival. Tracking information will be provided at time of shipment. Please allow 1-3 business days for handling before shipment.</p><p><strong>Returns</strong><br>Returns are accepted within 30 days of delivery. Item must be returned in the same condition as shipped. Buyer is responsible for return shipping costs unless the item arrives not as described.</p><p><strong>Questions</strong><br>Feel free to message with any questions about the item prior to purchasing. Additional photos can be provided upon request. We aim to respond to all inquiries within 24 hours.</p>",
+        "status": "ReadyToList"
+      },
+      "expected_comps": {
+        "median_price": 30,
+        "comps_count": 13,
+        "checked_manually_on_ebay": true,
+        "date_checked": "2026-07-18",
+        "notes": ""
+      },
+      "price_error_pct": 0,
+      "within_15_pct": true,
+      "comps_count_predicted": 25,
+      "comps_count_actual": 13,
+      "total_miss": false
+    },
+    {
+      "id": "item-003",
+      "priced": {
+        "ebay_search_query": "Hess Cargo Plane Jet",
+        "ebay_comps_count": 25,
+        "ebay_comp_price_median": 27.99,
+        "ebay_comp_price_range": "$9.99-$49.95",
+        "ebay_price": 30.99,
+        "list_price_final": 30.99,
+        "price_confidence": "High",
+        "price_override_reason": null,
+        "description_short": "Very Good condition Hess Cargo Plane and Jet set. Complete with all pieces included. Ships USPS flat rate.",
+        "description_long": "<p><strong>Item Identification:</strong> This listing is for the Hess Cargo Plane and Jet toy set. Hess holiday toy vehicles are well-known collectible die-cast and plastic toys released annually by the Hess Corporation. This set includes both the cargo plane and the accompanying jet.</p><p><strong>Condition:</strong> This item is in Very Good condition. It shows light signs of normal play and handling consistent with its age, but remains in solid, presentable shape overall. No major cracks, breaks, or significant damage observed.</p><p><strong>Completeness:</strong> This set is complete. Both the cargo plane and the jet are included. All components that would have been originally packaged together are present and accounted for.</p><p><strong>Shipping:</strong> This item ships via USPS flat rate. It will be carefully packed to ensure safe arrival. Tracking information will be provided at the time of shipment. Please allow 1-3 business days for handling before the item is dropped off.</p><p><strong>Returns:</strong> We want you to be satisfied with your purchase. If there is an issue with your order, please reach out within 30 days of delivery and we will work to make it right. Item must be returned in the same condition as received.</p><p><strong>Questions:</strong> If you have any questions about this item, including requests for additional photos or details about specific areas of the toy, please do not hesitate to send a message before purchasing. We are happy to help and will respond promptly.</p>",
+        "status": "ReadyToList"
+      },
+      "expected_comps": {
+        "median_price": 34.99,
+        "comps_count": 25,
+        "checked_manually_on_ebay": true,
+        "date_checked": "2026-07-18",
+        "notes": ""
+      },
+      "price_error_pct": 20,
+      "within_15_pct": false,
+      "comps_count_predicted": 25,
+      "comps_count_actual": 25,
+      "total_miss": false
+    },
+    {
+      "id": "item-004",
+      "priced": {
+        "ebay_search_query": "MGM/UA Rocky Commemorative 20th Anniversary VHS Gift",
+        "ebay_comps_count": 25,
+        "ebay_comp_price_median": 12.99,
+        "ebay_comp_price_range": "$6.00-$24.99",
+        "ebay_price": 13.99,
+        "list_price_final": 13.99,
+        "price_confidence": "High",
+        "price_override_reason": null,
+        "description_short": "Very Good condition Rocky Commemorative 20th Anniversary VHS Gift Set. Complete set included. Ships USPS flat rate.",
+        "description_long": "<p><strong>Item Identification</strong><br>This is the MGM/UA Home Video Rocky Commemorative 20th Anniversary VHS Gift Set. Released to celebrate the 20th anniversary of the iconic Rocky franchise, this collectible gift set was produced by MGM/UA Home Video and represents a significant milestone release for fans of the series.</p><p><strong>Condition</strong><br>This set is rated Very Good. The packaging shows light signs of normal use and handling consistent with age, but remains presentable and intact. No major damage, heavy creasing, or significant defacing noted. Tapes are included and appear to be in played condition with no visible damage to cassette housings.</p><p><strong>Completeness</strong><br>This set is complete. All components that were originally included with the gift set are present. Buyers can expect to receive everything as originally packaged for this commemorative release.</p><p><strong>Shipping</strong><br>Item ships via USPS flat rate service. Orders are carefully packed to ensure safe arrival. Tracking information will be provided upon shipment. Please allow 1-2 business days for handling before the item is dispatched.</p><p><strong>Returns</strong><br>Returns are accepted within 30 days of delivery. Item must be returned in the same condition as received. Buyer is responsible for return shipping costs unless the item was not as described.</p><p><strong>Questions</strong><br>If you have any questions about this item, its condition, or any other details not covered here, please feel free to send a message through eBay's messaging system before purchasing. Additional photos can be provided upon request.</p>",
+        "status": "ReadyToList"
+      },
+      "expected_comps": {
+        "median_price": 15.38,
+        "comps_count": 12,
+        "checked_manually_on_ebay": true,
+        "date_checked": "2026-07-18",
+        "notes": ""
+      },
+      "price_error_pct": 15.5,
+      "within_15_pct": false,
+      "comps_count_predicted": 25,
+      "comps_count_actual": 12,
+      "total_miss": false
+    },
+    {
+      "id": "item-005",
+      "priced": {
+        "ebay_search_query": "Westminster 3901",
+        "ebay_comps_count": 2,
+        "ebay_comp_price_median": 15.945,
+        "ebay_comp_price_range": "$14.99-$16.90",
+        "ebay_price": 18.99,
+        "list_price_final": 18.99,
+        "price_confidence": "Medium",
+        "price_override_reason": null,
+        "description_short": "Mint condition Westminster Old No. 9 Express Toy Train in a Tin. Complete set included. Ships USPS flat rate.",
+        "description_long": "<p><strong>Item Identification</strong><br>This is the Westminster Toy Train in a Tin, featuring the Old No. 9 Express, model number 3901. Westminster is well known for producing classic tin toy collectibles, and this piece is a charming example of their traditional tin train line. The Old No. 9 Express design captures the nostalgic aesthetic of classic locomotive styling in a compact, collectible tin package.</p><p><strong>Condition</strong><br>This item is in Mint condition. The tin and all components show no signs of wear, scratches, dents, or discoloration. The finish is crisp and bright throughout. No condition issues have been noted.</p><p><strong>Completeness</strong><br>This listing is for a complete set. All original components are present and accounted for. Nothing is missing from the original contents.</p><p><strong>Shipping</strong><br>This item ships via USPS flat rate service. It will be carefully packed to ensure safe arrival. Tracking information will be provided at the time of shipment. Please allow 1-2 business days for handling before the item is dispatched.</p><p><strong>Returns</strong><br>Returns are accepted within 30 days of delivery. The item must be returned in the same condition as received. Buyer is responsible for return shipping costs unless the item was misrepresented in the listing.</p><p><strong>Questions</strong><br>If you have any questions about this item, please feel free to send a message before purchasing. Additional photos can be provided upon request. Happy to help with any details you need to make a confident buying decision.</p>",
+        "status": "ReadyToList"
+      },
+      "expected_comps": {
+        "median_price": 14.99,
+        "comps_count": 7,
+        "checked_manually_on_ebay": true,
+        "date_checked": "2026-07-18",
+        "notes": ""
+      },
+      "price_error_pct": 6.4,
+      "within_15_pct": true,
+      "comps_count_predicted": 2,
+      "comps_count_actual": 7,
+      "total_miss": false
+    },
+    {
+      "id": "item-006",
+      "priced": {
+        "ebay_search_query": "PEZ Twelve Days Christmas Ornaments",
+        "ebay_comps_count": 24,
+        "ebay_comp_price_median": null,
+        "ebay_comp_price_range": "$10.50-$120.00 / $194.99-$525.00 (bimodal — review)",
+        "ebay_price": null,
+        "list_price_final": null,
+        "price_confidence": "Low",
+        "price_override_reason": "comps split into two price clusters — possible product mismatch, human review required",
+        "description_short": "PEZ Twelve Days of Christmas Ornaments — comps split into two price clusters — possible product mismatch, human review required",
+        "description_long": null,
+        "status": "ReadyToList"
+      },
+      "expected_comps": {
+        "median_price": 8.5,
+        "comps_count": 3,
+        "checked_manually_on_ebay": true,
+        "date_checked": "2026-07-18",
+        "notes": ""
+      },
+      "price_error_pct": null,
+      "within_15_pct": false,
+      "comps_count_predicted": 24,
+      "comps_count_actual": 3,
+      "total_miss": true
+    }
+  ]
+}
