@@ -24,6 +24,31 @@ export async function fetchReadyToListByBatch(env: Env, batchId: string): Promis
   return (await res.json()) as ReadyItem[]
 }
 
+export const PATCHABLE_FIELDS = new Set([
+  'item_name',
+  'brand',
+  'list_price_final',
+  'ebay_price',
+  'condition_ebay',
+  'condition_notes',
+  'description_short',
+  'description_long',
+])
+
+export async function patchItem(env: Env, itemId: string, changes: Record<string, unknown>): Promise<void> {
+  const disallowed = Object.keys(changes).filter(k => !PATCHABLE_FIELDS.has(k))
+  if (disallowed.length > 0) {
+    throw new Error(`Field(s) not editable via this endpoint: ${disallowed.join(', ')}`)
+  }
+  const url = `${env.SUPABASE_URL}/rest/v1/items?item_id=eq.${itemId}`
+  const res = await fetch(url, {
+    method: 'PATCH',
+    headers: headers(env),
+    body: JSON.stringify(changes),
+  })
+  if (!res.ok) throw new Error(`Supabase patchItem ${res.status}`)
+}
+
 export async function markListed(env: Env, itemId: string, listingId: string): Promise<void> {
   const url = `${env.SUPABASE_URL}/rest/v1/items?item_id=eq.${itemId}`
   const res = await fetch(url, {

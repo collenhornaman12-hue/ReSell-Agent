@@ -76,6 +76,7 @@ export interface UseInventoryReturn {
   loading: boolean
   error: string | null
   updateItemStatus: (item_id: string, newStatus: ItemStatus) => Promise<void>
+  updateItem: (item_id: string, changes: Partial<Item>) => Promise<void>
   deleteItem: (item_id: string) => Promise<void>
   refresh: () => Promise<void>
 }
@@ -145,6 +146,23 @@ export function useInventory(): UseInventoryReturn {
     [refresh]
   )
 
+  const updateItem = useCallback(
+    async (item_id: string, changes: Partial<Item>) => {
+      const res = await fetch(`/api/listing/item/${item_id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Worker-Token': import.meta.env.VITE_WORKER_SECRET as string,
+        },
+        body: JSON.stringify(changes),
+      })
+      const data = (await res.json()) as { success?: boolean; error?: string }
+      if (!res.ok || data.error) throw new Error(data.error ?? `Error ${res.status}`)
+      await refresh()
+    },
+    [refresh]
+  )
+
   const deleteItem = useCallback(
     async (item_id: string) => {
       const { error: err } = await supabase.from('items').delete().eq('item_id', item_id)
@@ -160,6 +178,7 @@ export function useInventory(): UseInventoryReturn {
     loading,
     error,
     updateItemStatus,
+    updateItem,
     deleteItem,
     refresh,
   }

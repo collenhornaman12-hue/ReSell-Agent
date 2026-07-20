@@ -1,12 +1,12 @@
 import type { Env } from './types'
 import { validateEnv, validateItem, listItem, shouldAutoPublish } from './ebay-api'
-import { fetchItem, fetchReadyToListByBatch, markListed } from './supabase'
+import { fetchItem, fetchReadyToListByBatch, markListed, patchItem, PATCHABLE_FIELDS } from './supabase'
 import { checkRateLimit } from '../../shared/rateLimit'
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'POST, PATCH, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, X-Worker-Token',
 }
 
 function json(body: unknown, status = 200): Response {
@@ -71,6 +71,24 @@ export default {
     }
 
     const url = new URL(request.url)
+
+    // PATCH /api/listing/item/:item_id — update allowlisted fields via service_role
+    const patchMatch = /^\/api\/listing\/item\/([^/]+)$/.exec(url.pathname)
+    if (patchMatch && request.method === 'PATCH') {
+      const itemId = patchMatch[1]
+      const changes = (await request.json()) as Record<string, unknown>
+      const disallowed = Object.keys(changes).filter(k => !PATCHABLE_FIELDS.has(k))
+      if (disallowed.length > 0) {
+        return json({ error: `Field(s) not editable via this endpoint: ${disallowed.join(', ')}` }, 400)
+      }
+      try {
+        await patchItem(env, itemId, changes)
+        return json({ success: true })
+      } catch (e) {
+        return json({ error: (e as Error).message }, 502)
+      }
+    }
+
     if (url.pathname !== '/api/listing/trigger' || request.method !== 'POST') {
       return json({ error: 'Not found' }, 404)
     }
