@@ -1,35 +1,23 @@
 import { useState, useCallback, useRef } from 'react'
+import {
+  batchPercent,
+  batchReducer,
+  type BatchAction,
+  type BatchState,
+  type UploadedPhoto,
+} from '@/lib/uploadBatch'
+
+// Types live with the pure state machine in src/lib/uploadBatch.ts; re-exported for existing imports.
+export type {
+  BatchState,
+  ItemUploadState,
+  PhotoStatus,
+  UploadedPhoto,
+} from '@/lib/uploadBatch'
 
 const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME as string
 const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET as string
 const UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`
-
-export type PhotoStatus = 'pending' | 'uploading' | 'done' | 'error'
-
-export interface UploadedPhoto {
-  publicId: string
-  secureUrl: string
-  thumbnailUrl: string
-}
-
-export interface ItemUploadState {
-  itemName: string
-  totalFiles: number
-  uploadedCount: number
-  failedCount: number
-  status: PhotoStatus
-  photos: UploadedPhoto[]
-  error?: string
-}
-
-export interface BatchState {
-  batchId: string
-  items: Record<string, ItemUploadState>
-  overallStatus: 'idle' | 'uploading' | 'done' | 'error'
-  triggerStatus: 'idle' | 'pending' | 'success' | 'error'
-  triggerError?: string
-  expectedItemCount: number
-}
 
 function makeThumbnailUrl(secureUrl: string): string {
   return secureUrl.replace('/upload/', '/upload/w_120,h_120,c_fill/')
@@ -88,19 +76,16 @@ async function triggerVisionPipeline(
 export function useCloudinaryUpload() {
   const [batch, setBatch] = useState<BatchState | null>(null)
   const abortRef = useRef(false)
+  const dispatch = useCallback((action: BatchAction) => {
+    setBatch((prev) => batchReducer(prev, action))
+  }, [])
 
   const initBatch = useCallback((): string => {
     const batchId = crypto.randomUUID()
-    setBatch({
-      batchId,
-      items: {},
-      overallStatus: 'idle',
-      triggerStatus: 'idle',
-      expectedItemCount: 0,
-    })
+    dispatch({ type: 'init', batchId })
     abortRef.current = false
     return batchId
-  }, [])
+  }, [dispatch])
 
   const uploadItem = useCallback(
     async (
@@ -110,24 +95,7 @@ export function useCloudinaryUpload() {
     ): Promise<UploadedPhoto[]> => {
       const itemKey = `${batchId}/${itemName}`
 
-      setBatch((prev) =>
-        prev
-          ? {
-              ...prev,
-              items: {
-                ...prev.items,
-                [itemKey]: {
-                  itemName,
-                  totalFiles: files.length,
-                  uploadedCount: 0,
-                  failedCount: 0,
-                  status: 'uploading',
-                  photos: [],
-                },
-              },
-            }
-          : prev
-      )
+      dispatch({ type: 'itemStarted', itemKey, itemName, totalFiles: files.length })
 
       const photos: UploadedPhoto[] = []
       let failedCount = 0
@@ -139,66 +107,25 @@ export function useCloudinaryUpload() {
         try {
           const photo = await uploadFile(file, publicId)
           photos.push(photo)
-          setBatch((prev) =>
-            prev
-              ? {
-                  ...prev,
-                  items: {
-                    ...prev.items,
-                    [itemKey]: {
-                      ...prev.items[itemKey],
-                      uploadedCount: photos.length,
-                      photos: [...photos],
-                    },
-                  },
-                }
-              : prev
-          )
+          dispatch({ type: 'photoUploaded', itemKey, photos })
         } catch {
           failedCount++
-          setBatch((prev) =>
-            prev
-              ? {
-                  ...prev,
-                  items: {
-                    ...prev.items,
-                    [itemKey]: {
-                      ...prev.items[itemKey],
-                      failedCount,
-                    },
-                  },
-                }
-              : prev
-          )
+          dispatch({ type: 'photoFailed', itemKey, failedCount })
         }
       }
 
-      setBatch((prev) =>
-        prev
-          ? {
-              ...prev,
-              items: {
-                ...prev.items,
-                [itemKey]: {
-                  ...prev.items[itemKey],
-                  status: failedCount === files.length ? 'error' : 'done',
-                  error: failedCount > 0 ? `${failedCount} file(s) failed` : undefined,
-                },
-              },
-            }
-          : prev
-      )
+      dispatch({ type: 'itemFinished', itemKey, failedCount, totalFiles: files.length })
 
       return photos
     },
-    []
+    [dispatch]
   )
 
   const uploadBatch = useCallback(
     async (items: Array<{ name: string; files: File[] }>): Promise<void> => {
       const batchId = initBatch()
 
-      setBatch((prev) => (prev ? { ...prev, overallStatus: 'uploading' } : prev))
+      dispatch({ type: 'uploadsStarted' })
 
       const triggerItems: Array<{ item_name_seed: string; photo_urls: string[] }> = []
 
@@ -213,32 +140,21 @@ export function useCloudinaryUpload() {
         }
       }
 
-      setBatch((prev) => {
-        if (!prev) return prev
-        const allFailed = Object.values(prev.items).every((i) => i.status === 'error')
-        return { ...prev, overallStatus: allFailed ? 'error' : 'done' }
-      })
+      dispatch({ type: 'uploadsFinished' })
 
-      setBatch((prev) => (prev ? { ...prev, triggerStatus: 'pending' } : prev))
+      dispatch({ type: 'triggerStarted' })
       console.log('[upload] triggerItems:', JSON.stringify(triggerItems, null, 2))
       try {
         const itemCount = await triggerVisionPipeline(batchId, triggerItems)
-        setBatch((prev) =>
-          prev ? { ...prev, triggerStatus: 'success', expectedItemCount: itemCount } : prev
-        )
+        dispatch({ type: 'triggerSucceeded', itemCount })
       } catch (err) {
-        setBatch((prev) =>
-          prev
-            ? {
-                ...prev,
-                triggerStatus: 'error',
-                triggerError: err instanceof Error ? err.message : 'Unknown error',
-              }
-            : prev
-        )
+        dispatch({
+          type: 'triggerFailed',
+          error: err instanceof Error ? err.message : 'Unknown error',
+        })
       }
     },
-    [initBatch, uploadItem]
+    [dispatch, initBatch, uploadItem]
   )
 
   const reset = useCallback(() => {
@@ -246,15 +162,7 @@ export function useCloudinaryUpload() {
     setBatch(null)
   }, [])
 
-  const overallPercent = batch
-    ? (() => {
-        const items = Object.values(batch.items)
-        if (items.length === 0) return 0
-        const total = items.reduce((s, i) => s + i.totalFiles, 0)
-        const done = items.reduce((s, i) => s + i.uploadedCount, 0)
-        return total === 0 ? 0 : Math.round((done / total) * 100)
-      })()
-    : 0
+  const overallPercent = batchPercent(batch)
 
   return { batch, uploadBatch, uploadItem, initBatch, reset, overallPercent }
 }
