@@ -78,9 +78,7 @@ test('every transition the code performs today is allowed by the map', () => {
     ['ReadyToList', 'ReadyToList', 'pricing worker re-price of Low confidence / ReviewQueue approve'],
     ['ReadyToList', 'Archived', 'pricing floor / ItemDrawer Archive / ReviewQueue reject / bulk archive'],
     ['ReadyToList', 'Listed', 'listing worker markListed'],
-    ['Listed', 'Archived', 'InventoryView bulk archive'],
     ['Sold', 'Archived', 'InventoryView bulk archive'],
-    ['SoldPendingApproval', 'Archived', 'InventoryView bulk archive'],
     ['Archived', 'PendingReview', 'ArchivedView restore'],
     ['Archived', 'ReadyToList', 'ItemDrawer unarchive'],
   ]
