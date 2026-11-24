@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useInventoryContext } from '@/context/InventoryContext'
 import { Item } from '@/hooks/useInventory'
-import { needsPricing } from '@/lib/itemStatus'
+import { bulkArchiveSkipMessage, needsPricing, splitForBulkArchive } from '@/lib/itemStatus'
 import { ItemsTable } from './ItemsTable'
 import { ItemDrawer } from './ItemDrawer'
 import { Select } from '@/components/ui/select'
@@ -27,6 +27,7 @@ export function InventoryView() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [pricing, setPricing] = useState(false)
   const [pricingProgress, setPricingProgress] = useState<{ current: number; total: number } | null>(null)
+  const [archiveNotice, setArchiveNotice] = useState<string | null>(null)
 
   const pendingBatchIds = useMemo(
     () => [
@@ -95,7 +96,10 @@ export function InventoryView() {
   }
 
   async function archiveSelected() {
-    await Promise.all([...selectedIds].map((id) => updateItemStatus(id, 'Archived')))
+    // Listed items keep a live eBay listing, so they are skipped, not archived (see itemStatus.ts).
+    const { toArchive, skipped } = splitForBulkArchive(selectedIds, items)
+    setArchiveNotice(bulkArchiveSkipMessage(skipped.length))
+    await Promise.all(toArchive.map((id) => updateItemStatus(id, 'Archived')))
     setSelectedIds(new Set())
   }
 
@@ -161,6 +165,22 @@ export function InventoryView() {
           </Button>
         )}
       </div>
+
+      {archiveNotice && (
+        <div
+          role="status"
+          className="mb-4 flex items-center justify-between gap-4 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-400"
+        >
+          <span>{archiveNotice}</span>
+          <button
+            type="button"
+            className="text-xs underline underline-offset-2"
+            onClick={() => setArchiveNotice(null)}
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
 
       <ItemsTable
         items={filtered}

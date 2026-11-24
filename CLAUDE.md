@@ -50,7 +50,7 @@ Upload UI (Cloudinary)
 ```
 
 ### Item status lifecycle
-`PendingReview` → `ReadyToList` → `Listed` → `SoldPendingApproval` → `Sold` (or `Archived` at any stage)
+`PendingReview` → `ReadyToList` → `Listed` → `SoldPendingApproval` → `Sold` (or `Archived` from any stage except `Listed` / `SoldPendingApproval`, which may still be live on eBay)
 
 All state machines (item status, review/pricing/auto-publish gates, upload batch reducer, publish pipeline) are documented in `STATE_MACHINES.md`; status values and gates live in `src/lib/itemStatus.ts`. Update it when you add a state. Root tests: `npm test`.
 

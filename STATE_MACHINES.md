@@ -24,7 +24,7 @@ Tests: `npm test` (root, `tests/*.test.ts`), `cd workers/listing && npm test`, `
 | ReadyToList | ReadyToList | pricing worker re-prices `Low` confidence items; ReviewQueue Approve |
 | ReadyToList | Listed | listing worker `markListed` (`workers/listing/src/supabase.ts`) — also sets `ebay_listing_id`, `date_listed` |
 | Listed | SoldPendingApproval → Sold | **planned, no code yet** |
-| any | Archived | InventoryView "Archive Selected" (bulk; does not end a live eBay listing) |
+| PendingReview / ReadyToList / Sold | Archived | InventoryView "Archive Selected" (bulk). `Listed` and `SoldPendingApproval` items are skipped (`splitForBulkArchive`) with the notice "N listed items skipped: end them on eBay first"; no eBay call is made |
 | Archived | PendingReview | ArchivedView Restore (row button and bulk) |
 | Archived | ReadyToList | ItemDrawer "Unarchive Item" |
 
@@ -34,8 +34,14 @@ Tests: `npm test` (root, `tests/*.test.ts`), `cd workers/listing && npm test`, `
 - ItemDrawer shows an actions panel only for `STATUSES_WITH_DRAWER_ACTIONS` (`ReadyToList, Listed, Sold, Archived`).
 - `ItemsTable` `STATUS_CLASS` is `satisfies Record<ItemStatus, string>` — adding a status without a badge colour fails `tsc`.
 
+- `Listed` and `SoldPendingApproval` have no `→ Archived` edge: they may have a live eBay listing and the
+  dashboard cannot end one. Add the edge back only with code that ends the listing first.
+
 **Known gaps (not changed):** Unarchive goes to `ReadyToList` from the drawer but `PendingReview` from the
-Archived view. Bulk archive of a `Listed` item leaves it live on eBay.
+Archived view.
+
+**Fixed:** bulk archive used to set `Listed` items to `Archived`, leaving them live on eBay. It now skips
+`Listed` / `SoldPendingApproval` items and says how many it skipped (`tests/bulkArchive.test.ts`).
 
 ## 2. Status gates (derived, not stored)
 
