@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useInventoryContext } from '@/context/InventoryContext'
 import { Item } from '@/hooks/useInventory'
+import { needsPricing } from '@/lib/itemStatus'
 import { ItemsTable } from './ItemsTable'
 import { ItemDrawer } from './ItemDrawer'
 import { Select } from '@/components/ui/select'
@@ -31,12 +32,7 @@ export function InventoryView() {
     () => [
       ...new Set(
         items
-          .filter(
-            (i) =>
-              (i.status === 'PendingReview' ||
-                (i.status === 'ReadyToList' && i.price_confidence === 'Low')) &&
-              i.batch_id
-          )
+          .filter((i) => needsPricing(i) && i.batch_id)
           .map((i) => i.batch_id as string)
       ),
     ],

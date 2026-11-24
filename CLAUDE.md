@@ -52,6 +52,8 @@ Upload UI (Cloudinary)
 ### Item status lifecycle
 `PendingReview` → `ReadyToList` → `Listed` → `SoldPendingApproval` → `Sold` (or `Archived` at any stage)
 
+All state machines (item status, review/pricing/auto-publish gates, upload batch reducer, publish pipeline) are documented in `STATE_MACHINES.md`; status values and gates live in `src/lib/itemStatus.ts`. Update it when you add a state. Root tests: `npm test`.
+
 ### Bundle rules (pricing worker)
 - **Rule 1**: 3+ items share same `brand` AND `subcategory` → themed lot at 0.85× summed price
 - **Rule 2**: 2+ items with `list_price_final ≤ $10` share `brand` OR `subcategory` → low-value lot

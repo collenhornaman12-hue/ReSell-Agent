@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useInventoryContext } from '@/context/InventoryContext'
 import { Item } from '@/hooks/useInventory'
+import { needsReview } from '@/lib/itemStatus'
 import { ItemsTable } from './ItemsTable'
 import { ItemDrawer } from './ItemDrawer'
 
@@ -8,16 +9,7 @@ export function ReviewQueue() {
   const { items, loading, updateItemStatus } = useInventoryContext()
   const [selectedItem, setSelectedItem] = useState<Item | null>(null)
 
-  const reviewItems = useMemo(
-    () =>
-      items.filter(
-        (i) =>
-          i.status === 'PendingReview' ||
-          (i.status === 'ReadyToList' &&
-            ((i.list_price_final ?? 0) > 50 || i.price_confidence === 'Low'))
-      ),
-    [items]
-  )
+  const reviewItems = useMemo(() => items.filter(needsReview), [items])
 
   return (
     <div className="px-6 py-4">

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Item, ItemStatus } from '@/hooks/useInventory'
 import { useInventoryContext } from '@/context/InventoryContext'
 import { formatPrice } from '@/lib/format'
+import { STATUSES_WITH_DRAWER_ACTIONS } from '@/lib/itemStatus'
 
 interface ItemDrawerProps {
   item: Item | null
@@ -441,7 +442,7 @@ export function ItemDrawer({ item, onClose, updateItemStatus }: ItemDrawerProps)
                     )}
                   </div>
                 )}
-                {!['ReadyToList', 'Listed', 'Sold', 'Archived'].includes(localItem.status) && (
+                {!STATUSES_WITH_DRAWER_ACTIONS.includes(localItem.status) && (
                   <p className="text-xs text-muted-foreground">
                     No actions available for status: {localItem.status}
                   </p>

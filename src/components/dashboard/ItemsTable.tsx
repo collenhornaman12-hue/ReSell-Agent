@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { cn } from '@/lib/utils'
 import { formatPrice, formatRelativeTime } from '@/lib/format'
 import { Item } from '@/hooks/useInventory'
+import type { ItemStatus } from '@/lib/itemStatus'
 import {
   Table,
   TableHeader,
@@ -32,14 +33,14 @@ const CONFIDENCE_CLASS: Record<string, string> = {
   Low: 'bg-red-500/20 text-red-400 border-red-500/30',
 }
 
-const STATUS_CLASS: Record<string, string> = {
+const STATUS_CLASS = {
   PendingReview: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
   ReadyToList: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
   Listed: 'bg-green-500/20 text-green-400 border-green-500/30',
   SoldPendingApproval: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
   Sold: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
   Archived: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
-}
+} satisfies Record<ItemStatus, string>
 
 function ColorBadge({ value, map }: { value: string | null; map: Record<string, string> }) {
   if (!value) return <span className="text-muted-foreground">—</span>

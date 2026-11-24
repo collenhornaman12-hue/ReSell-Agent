@@ -1,18 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
+import { needsReview, type ItemStatus } from '@/lib/itemStatus'
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL as string,
   import.meta.env.VITE_SUPABASE_ANON_KEY as string
 )
 
-export type ItemStatus =
-  | 'PendingReview'
-  | 'ReadyToList'
-  | 'Listed'
-  | 'SoldPendingApproval'
-  | 'Sold'
-  | 'Archived'
+// Status union, gates and transition map live in src/lib/itemStatus.ts (see STATE_MACHINES.md).
+export type { ItemStatus } from '@/lib/itemStatus'
 
 export interface Item {
   item_id: string
@@ -87,12 +83,7 @@ function computeMetrics(items: Item[]): Metrics {
     listedValue: items
       .filter((i) => i.status === 'Listed')
       .reduce((sum, i) => sum + (i.list_price_final ?? 0), 0),
-    pendingReview: items.filter(
-      (i) =>
-        i.status === 'PendingReview' ||
-        (i.status === 'ReadyToList' &&
-          ((i.list_price_final ?? 0) > 50 || i.price_confidence === 'Low'))
-    ).length,
+    pendingReview: items.filter(needsReview).length,
     listed: items.filter((i) => i.status === 'Listed').length,
     sold: items.filter((i) => i.status === 'Sold').length,
     archived: items.filter((i) => i.status === 'Archived').length,
